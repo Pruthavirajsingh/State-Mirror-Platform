@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us and Use Cases | TIES Research</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f6f4f1;
+    --surface: #f7f4ef;
+    --surface2: #ece2ce;
+    --border: rgba(34,51,0,0.10);
+    --border2: rgba(34,51,0,0.16);
+    --text: #111111;
+    --muted: #5c5c5c;
+    --accent: #4b5d16;
+    --accent2: #e45c10;
+    --shadow: 0 18px 50px rgba(34,51,0,0.08);
+    --sans: 'DM Sans', sans-serif;
+    --mono: 'DM Sans', sans-serif;
+  }
+
+  body {
+    font-family: var(--sans);
+    color: var(--text);
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(242,182,53,0.10), transparent 28%),
+      radial-gradient(circle at 88% 10%, rgba(75,93,22,0.08), transparent 22%),
+      linear-gradient(180deg, #f7f4ef 0%, #f1eadf 100%);
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 28px;
+    background: rgba(246,244,241,0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(34,51,0,0.08);
+  }
+  .logo img {
+    display: block;
+    width: auto;
+    height: 48px;
+    max-width: min(320px, 72vw);
+    object-fit: contain;
+  }
+  .top-nav {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .top-nav-link {
+    text-decoration: none;
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border: 1px solid rgba(34,51,0,0.12);
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(236,226,206,0.82));
+  }
+
+  .page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 28px;
+  }
+
+  .hero {
+    padding: 14px 2px 24px;
+    max-width: 760px;
+  }
+  .hero-kicker {
+    font-size: 12px;
+    font-family: var(--mono);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(42px, 6vw, 76px);
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+    font-weight: 500;
+    margin-bottom: 22px;
+  }
+  .hero p {
+    max-width: 720px;
+    font-size: clamp(18px, 2vw, 28px);
+    line-height: 1.32;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .card-grid {
+    margin-top: 48px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .info-card {
+    min-height: 170px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(236,226,206,0.76));
+    border: 1px solid rgba(34,51,0,0.08);
+    border-radius: 22px;
+    padding: 18px 16px 16px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 15px;
+    line-height: 1.2;
+    font-weight: 600;
+    margin-bottom: 10px;
+    letter-spacing: -0.02em;
+  }
+  .card-title::before {
+    content: "+";
+    flex: 0 0 auto;
+    display: inline-grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #111111;
+    color: #f6f4f1;
+    font-size: 12px;
+    line-height: 1;
+    margin-top: 2px;
+  }
+  .card-text {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  .section-title {
+    margin-top: 34px;
+    font-size: 14px;
+    font-family: var(--mono);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .usecase-wrap {
+    margin-top: 16px;
+    background: rgba(255,255,255,0.48);
+    border: 1px solid rgba(34,51,0,0.08);
+    border-radius: 28px;
+    padding: 18px;
+    box-shadow: var(--shadow);
+  }
+  .usecase-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .usecase {
+    background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(236,226,206,0.8));
+    border-radius: 20px;
+    border: 1px solid rgba(34,51,0,0.08);
+    padding: 16px;
+    min-height: 132px;
+  }
+  .usecase h3 {
+    font-size: 15px;
+    line-height: 1.25;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .usecase p {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  @media (max-width: 1080px) {
+    .card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .usecase-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 720px) {
+    header {
+      padding: 14px 12px;
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .logo img {
+      height: 40px;
+      max-width: 80vw;
+    }
+    .page {
+      padding: 14px 12px 24px;
+    }
+    .hero {
+      padding-top: 10px;
+    }
+    .hero p {
+      font-size: 18px;
+    }
+    .card-grid,
+    .usecase-grid {
+      grid-template-columns: 1fr;
+    }
+    .info-card,
+    .usecase {
+      min-height: auto;
+    }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="ties-research-logo.svg" alt="Downties Research">
+    </div>
+    <nav class="top-nav" aria-label="About and use cases">
+      <a href="#use-cases" class="top-nav-link">Use Cases</a>
+      <a href="index.html" class="top-nav-link">Back to Tracker</a>
+    </nav>
+  </header>
+
+  <main class="page">
+    <section class="hero" id="about-us">
+      <div class="hero-kicker">TIES Research</div>
+      <h1>Built to map power, money, and influence.</h1>
+      <p>
+        This project is a living research interface for exploring political networks,
+        public disclosures, and connected entities in a clear, visual way. It is designed
+        to help users navigate complex relationships quickly while keeping the presentation
+        simple, readable, and grounded.
+      </p>
+    </section>
+
+    <section class="card-grid" aria-label="About details">
+      <article class="info-card">
+        <div class="card-title">Trace connections</div>
+        <div class="card-text">Follow links between leaders, parties, companies, donors, and legal controversies in a single map.</div>
+      </article>
+      <article class="info-card">
+        <div class="card-title">Compare networks</div>
+        <div class="card-text">Switch between parties and instantly compare funding, assets, symbols, and key relationships.</div>
+      </article>
+      <article class="info-card">
+        <div class="card-title">Inspect details</div>
+        <div class="card-text">Select a node to see contextual notes, linked entities, and source-backed summaries.</div>
+      </article>
+      <article class="info-card">
+        <div class="card-title">Stay oriented</div>
+        <div class="card-text">Use chips, search, and color cues to move through dense political data without losing context.</div>
+      </article>
+      <article class="info-card">
+        <div class="card-title">Work in progress</div>
+        <div class="card-text">The product is actively evolving, so data, labels, and mappings may improve as the research set expands.</div>
+      </article>
+    </section>
+
+    <section id="use-cases">
+      <div class="section-title">Use Cases</div>
+      <div class="usecase-wrap">
+        <div class="usecase-grid">
+          <article class="usecase">
+            <h3>Investigative journalism</h3>
+            <p>Use the graph to quickly uncover party-linked companies, assets, donors, and legal pressure points.</p>
+          </article>
+          <article class="usecase">
+            <h3>Research briefing</h3>
+            <p>Turn a dense set of affidavits and reports into a visual summary for fast internal review.</p>
+          </article>
+          <article class="usecase">
+            <h3>Election analysis</h3>
+            <p>Compare political organizations by funding, leadership wealth, and controversy profile.</p>
+          </article>
+          <article class="usecase">
+            <h3>Classroom explanation</h3>
+            <p>Show how political ecosystems connect across parties, regions, business interests, and institutions.</p>
+          </article>
+          <article class="usecase">
+            <h3>Editorial planning</h3>
+            <p>Identify the most important nodes and the most visible relationships before publishing a story.</p>
+          </article>
+          <article class="usecase">
+            <h3>Pattern discovery</h3>
+            <p>Spot repeated ties, recurring entities, and high-impact legal or financial intersections across parties.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
