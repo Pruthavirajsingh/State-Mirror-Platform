@@ -56,6 +56,8 @@
     display: flex;
     align-items: center;
     min-width: 0;
+    text-decoration: none;
+    color: inherit;
   }
   .logo img {
     display: block;
@@ -725,7 +727,7 @@
     }
     #graph-container {
       margin: 10px 10px 0;
-      min-height: clamp(430px, 64vh, 760px);
+      min-height: clamp(320px, 46vh, 520px);
       border-radius: 20px;
     }
     .graph-legend {
@@ -800,6 +802,40 @@
       font-size: 8px;
       padding: 4px 8px;
     }
+  }
+
+  @media (max-width: 480px) {
+    #graph-container {
+      min-height: clamp(260px, 38vh, 380px);
+    }
+    .graph-legend {
+      gap: 3px 6px;
+      padding: 7px 8px;
+    }
+    .legend-item {
+      font-size: 8px;
+      gap: 5px;
+    }
+    .graph-empty {
+      padding: 12px 10px;
+    }
+    .graph-empty p {
+      font-size: 9px;
+      line-height: 1.45;
+    }
+  }
+
+  @media (max-width: 360px) {
+    #graph-container {
+      min-height: clamp(240px, 35vh, 340px);
+    }
+    .graph-legend {
+      gap: 2px 5px;
+      padding: 6px 7px;
+    }
+    .legend-item {
+      font-size: 7px;
+    }
     #tooltip {
       display: none;
     }
@@ -812,9 +848,9 @@
 <div id="tooltip"></div>
 
 <header>
-  <div class="logo">
+  <a class="logo" href="index.html" aria-label="Home">
     <img src="ties-research-logo.png" alt="Downties Research">
-  </div>
+  </a>
   <nav class="top-nav" aria-label="About and use cases">
     <a href="about.html#use-cases" class="top-nav-link">Use Cases</a>
   </nav>

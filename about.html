@@ -47,6 +47,13 @@
     backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(34,51,0,0.08);
   }
+  .logo {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    text-decoration: none;
+    color: inherit;
+  }
   .logo img {
     display: block;
     width: auto;
@@ -226,11 +233,11 @@
   }
 </style>
 </head>
-<body>
+  <body>
   <header>
-    <div class="logo">
+    <a class="logo" href="index.html" aria-label="Home">
       <img src="ties-research-logo.png" alt="Downties Research">
-    </div>
+    </a>
     <nav class="top-nav" aria-label="About and use cases">
       <a href="#use-cases" class="top-nav-link">Use Cases</a>
       <a href="index.html" class="top-nav-link">Back to Tracker</a>
