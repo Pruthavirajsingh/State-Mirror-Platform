@@ -33,12 +33,21 @@
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    overflow-y: auto;
     overflow-x: hidden;
     background-image:
       radial-gradient(circle at 20% 20%, rgba(242,182,53,0.08), transparent 28%),
       radial-gradient(circle at 80% 10%, rgba(75,93,22,0.08), transparent 24%),
       linear-gradient(180deg, #f6f4f1 0%, #f0e5cf 100%);
   }
+  html {
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+  body::-webkit-scrollbar { width: 10px; }
+  body::-webkit-scrollbar-track { background: transparent; }
+  body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 999px; }
 
   /* â”€â”€ Header â”€â”€ */
   header {
@@ -801,6 +810,16 @@
     .filter-pill {
       font-size: 8px;
       padding: 4px 8px;
+    }
+    html, body {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    body::-webkit-scrollbar {
+      width: 6px;
+    }
+    body::-webkit-scrollbar-thumb {
+      background: rgba(75,93,22,0.35);
     }
   }
 
