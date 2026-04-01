@@ -393,6 +393,28 @@
     color: var(--accent2);
     line-height: 1.6;
   }
+  .entity-meta-links {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .entity-source-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    color: var(--accent2);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid rgba(75,93,22,0.16);
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: linear-gradient(180deg, rgba(246,244,241,0.95), rgba(236,226,206,0.85));
+  }
+  .entity-source-link:hover { border-color: var(--accent); color: var(--text); }
 
   /* Stats row */
   .stats-row {
@@ -517,6 +539,10 @@
     display: flex;
     align-items: center;
     gap: 10px;
+  }
+  a.node-card {
+    color: inherit;
+    text-decoration: none;
   }
   .node-card:hover { border-color: var(--border2); background: var(--surface2); }
   .node-card:last-child { margin-bottom: 0; }
@@ -2383,6 +2409,47 @@ const PARTY_SYMBOLS = {
 };
 
 // â”€â”€â”€ SEARCH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function normalizeRefQuery(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function wikipediaSearchUrl(query) {
+  return `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(normalizeRefQuery(query))}`;
+}
+
+function newsSearchUrl(query) {
+  return `https://news.google.com/search?q=${encodeURIComponent(normalizeRefQuery(query))}`;
+}
+
+function isCaseLike(node = {}) {
+  const haystack = normalizeRefQuery(`${node.label || ''} ${node.desc || ''} ${node.type || ''}`).toLowerCase();
+  return /case|controvers|probe|bail|raid|summons|scam|fir|criminal|assets|allegation|arrest|charges|court|legal|money laundering|disproportionate|ed |acb|cbi/.test(haystack);
+}
+
+function referenceForNode(node, entity) {
+  const label = normalizeRefQuery(node.label || node.name || entity?.name || '');
+  const context = normalizeRefQuery(`${label} ${entity?.name || ''} ${node.desc || ''}`);
+  if (node.type === 'person') {
+    return { href: wikipediaSearchUrl(label), label: 'Wikipedia profile', kind: 'wiki' };
+  }
+  if (isCaseLike(node) || ['flag', 'govt', 'govtlink', 'investigating'].includes(node.type)) {
+    return { href: newsSearchUrl(context), label: 'News coverage', kind: 'news' };
+  }
+  return { href: wikipediaSearchUrl(context || label), label: 'Web reference', kind: 'wiki' };
+}
+
+function referenceForEntity(entity) {
+  const label = normalizeRefQuery(entity?.name || entity?.id || '');
+  const context = normalizeRefQuery(`${label} ${entity?.desc || ''}`);
+  if (/person/i.test(entity?.type)) {
+    return { href: wikipediaSearchUrl(label), label: 'Wikipedia profile', kind: 'wiki' };
+  }
+  if (isCaseLike(entity) || entity?.type === 'flag') {
+    return { href: newsSearchUrl(context), label: 'News coverage', kind: 'news' };
+  }
+  return { href: wikipediaSearchUrl(context || label), label: 'Web reference', kind: 'wiki' };
+}
+
 function runSearch() {
   const val = document.getElementById('search-input').value.trim().toLowerCase();
   const aliases = {
@@ -2608,6 +2675,7 @@ function renderSidebarEntity(entity) {
   document.getElementById('sidebar-status').textContent = 'MAPPED';
   const risk = entity.riskLevel;
   const riskColor = risk === 'HIGH' ? '#e45c10' : risk === 'MEDIUM' ? '#f2b635' : '#4b5d16';
+  const entityRef = referenceForEntity(entity);
   const symbol = PARTY_SYMBOLS[entity.id] || PARTY_SYMBOLS[entity.name.toLowerCase()] || { name: 'Symbol', glyph: '•', note: 'No symbol mapped' };
   const symbolMarkup = symbol.image
     ? `<div class="symbol-glyph symbol-glyph-image"><img src="${symbol.image}" alt="${symbol.name}"></div>`
@@ -2620,6 +2688,9 @@ function renderSidebarEntity(entity) {
       <div class="entity-type-badge" style="background:${TYPE_COLOR[entity.type]};color:${['sub','global'].includes(entity.type) ? '#223300' : '#f6f4f1'};border:1px solid ${TYPE_COLOR[entity.type]}">${entity.type.toUpperCase()}</div>
       <div class="entity-name">${entity.name}</div>
       <div class="entity-desc">${entity.desc}</div>
+      <div class="entity-meta-links">
+        <a class="entity-source-link" href="${entityRef.href}" target="_blank" rel="noopener noreferrer">${entityRef.label}</a>
+      </div>
       <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
         <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">FOUNDED ${entity.founded}</span>
         <span style="color:var(--border2)">·</span>
@@ -2697,16 +2768,19 @@ function buildSubSections(entity) {
       <div class="sidebar-section">
         <div class="section-head">${typeLabel[type] || type.toUpperCase()} <span style="color:var(--accent)">${nodes.length}</span></div>
         <div class="section-content">
-          ${nodes.map(n => `
-            <div class="node-card" onclick="selectNodeById('${n.id}')">
-              <div class="node-dot" style="background:${TYPE_COLOR[n.type]}"></div>
-              <div class="node-card-text">
-                <div class="node-card-name">${n.label}</div>
-                <div class="node-card-sub">${n.desc.substring(0,55)}...</div>
-              </div>
-              <div class="node-card-arrow">-></div>
-            </div>
-          `).join('')}
+          ${nodes.map(n => {
+            const ref = referenceForNode(n, entity);
+            return `
+              <a class="node-card external-link" href="${ref.href}" target="_blank" rel="noopener noreferrer" title="${ref.label}">
+                <div class="node-dot" style="background:${TYPE_COLOR[n.type]}"></div>
+                <div class="node-card-text">
+                  <div class="node-card-name">${n.label}</div>
+                  <div class="node-card-sub">${n.desc.substring(0,55)}...</div>
+                </div>
+                <div class="node-card-arrow">↗</div>
+              </a>
+            `;
+          }).join('')}
         </div>
       </div>`;
   }
@@ -2716,6 +2790,7 @@ function buildSubSections(entity) {
 function renderSidebarNode(d) {
   document.getElementById('sidebar-status').textContent = 'NODE';
   const color = TYPE_COLOR[d.type];
+  const nodeRef = referenceForNode(d, currentEntity);
   const linkedNodes = [];
   if(currentEntity) {
     currentEntity.links.forEach(l => {
@@ -2732,21 +2807,28 @@ function renderSidebarNode(d) {
       <div class="entity-type-badge" style="background:${color};color:${['sub','global'].includes(d.type) ? '#223300' : '#f6f4f1'};border:1px solid ${color}">${d.type.toUpperCase()}</div>
       <div class="entity-name">${d.label}</div>
       <div class="entity-desc">${d.desc}</div>
+      <div class="entity-meta-links">
+        <a class="entity-source-link" href="${nodeRef.href}" target="_blank" rel="noopener noreferrer">${nodeRef.label}</a>
+      </div>
     </div>
 
     ${linkedNodes.length ? `
     <div class="sidebar-section">
       <div class="section-head">CONNECTIONS <span style="color:var(--accent)">${linkedNodes.length}</span></div>
       <div class="section-content">
-        ${linkedNodes.map(({node, rel}) => `
-          <div class="node-card" onclick="selectNodeById('${node.id}')">
-            <div class="node-dot" style="background:${TYPE_COLOR[node.type]}"></div>
-            <div class="node-card-text">
-              <div class="node-card-name">${node.label}</div>
-              <div class="node-card-sub" style="color:${LINK_COLOR[rel]||'var(--muted)'}">${rel.toUpperCase()}</div>
-            </div>
-          </div>
-        `).join('')}
+        ${linkedNodes.map(({node, rel}) => {
+          const ref = referenceForNode(node, currentEntity);
+          return `
+            <a class="node-card external-link" href="${ref.href}" target="_blank" rel="noopener noreferrer" title="${ref.label}">
+              <div class="node-dot" style="background:${TYPE_COLOR[node.type]}"></div>
+              <div class="node-card-text">
+                <div class="node-card-name">${node.label}</div>
+                <div class="node-card-sub" style="color:${LINK_COLOR[rel]||'var(--muted)'}">${rel.toUpperCase()}</div>
+              </div>
+              <div class="node-card-arrow">↗</div>
+            </a>
+          `;
+        }).join('')}
       </div>
     </div>` : ''}
 
