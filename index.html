@@ -55,21 +55,13 @@
   .logo {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 64px;
-    height: 64px;
-    flex: 0 0 64px;
     min-width: 0;
-    border-radius: 50%;
-    overflow: hidden;
-    background: rgba(246,244,241,0.94);
-    border: 1px solid rgba(34,51,0,0.12);
-    box-shadow: 0 6px 16px rgba(34,51,0,0.08);
   }
   .logo img {
     display: block;
-    width: 88%;
-    height: 88%;
+    width: auto;
+    height: 48px;
+    max-width: min(320px, 72vw);
     object-fit: contain;
   }
   .top-nav {
@@ -689,13 +681,11 @@
       border-radius: 0 0 18px 18px;
     }
     .logo {
-      width: 52px;
-      height: 52px;
-      flex: 0 0 52px;
+      width: min(250px, 78vw);
     }
     .logo img {
-      width: 86%;
-      height: 86%;
+      height: 40px;
+      max-width: 100%;
     }
     .top-nav {
       width: 100%;
