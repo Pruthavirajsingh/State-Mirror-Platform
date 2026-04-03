@@ -1,0 +1,63 @@
+{
+  "@context": {
+    "schema": "https://schema.org/",
+    "name": "schema:name",
+    "description": "schema:description",
+    "identifier": "schema:identifier",
+    "image": "schema:image",
+    "url": "schema:url",
+    "dateModified": "schema:dateModified",
+    "memberOf": {
+      "@id": "schema:memberOf",
+      "@type": "@id"
+    },
+    "affiliatedParty": {
+      "@id": "https://sansad.in/ontology/affiliatedParty",
+      "@type": "@id"
+    },
+    "representsConstituency": {
+      "@id": "https://sansad.in/ontology/representsConstituency",
+      "@type": "@id"
+    },
+    "belongsToState": {
+      "@id": "https://sansad.in/ontology/belongsToState",
+      "@type": "@id"
+    },
+    "lokSabhaTerms": "https://sansad.in/ontology/lokSabhaTerms",
+    "status": "https://sansad.in/ontology/status",
+    "gender": "https://sansad.in/ontology/gender",
+    "age": "https://sansad.in/ontology/age",
+    "profession": "https://sansad.in/ontology/profession",
+    "qualification": "https://sansad.in/ontology/qualification",
+    "sourceUrl": {
+      "@id": "schema:url",
+      "@type": "@id"
+    }
+  },
+  "@graph": [
+    {
+      "@id": "https://sansad.in/ontology/MemberOfParliament",
+      "@type": "schema:Thing",
+      "name": "Member of Parliament",
+      "description": "Live Lok Sabha member record sourced from Sansad members API."
+    },
+    {
+      "@id": "https://sansad.in/ontology/PoliticalParty",
+      "@type": "schema:Thing",
+      "name": "Political Party",
+      "description": "Party affiliation attached to a member record."
+    },
+    {
+      "@id": "https://sansad.in/ontology/Constituency",
+      "@type": "schema:Thing",
+      "name": "Constituency",
+      "description": "Parliamentary constituency represented by a member."
+    },
+    {
+      "@id": "https://sansad.in/ontology/State",
+      "@type": "schema:Thing",
+      "name": "State",
+      "description": "State represented by a member in the Lok Sabha."
+    }
+  ]
+}

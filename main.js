@@ -1248,6 +1248,7 @@ const LINK_COLOR = {
 
 // â”€â”€â”€ STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let currentEntity = null;
+window.CURRENT_ENTITY = null;
 let simulation = null;
 let svgEl = null;
 let zoomBeh = null;
@@ -1287,6 +1288,12 @@ function normalizePartySymbolRecord(symbol, key) {
 
 function normalizeSymbolKey(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+function setCurrentEntity(entity) {
+  currentEntity = entity;
+  window.CURRENT_ENTITY = entity;
+  return entity;
 }
 
 const PARTY_SYMBOL_ALIASES = {
@@ -1603,7 +1610,7 @@ function applyTrackerDataOverlay(data) {
   }
   window.TRACKER_DATA = data;
   if (currentEntity && currentEntity.id && CONGRESS_MAP[currentEntity.id]) {
-    currentEntity = CONGRESS_MAP[currentEntity.id];
+    setCurrentEntity(CONGRESS_MAP[currentEntity.id]);
   }
   if (currentEntity) {
     renderGraph(currentEntity);
@@ -1612,8 +1619,10 @@ function applyTrackerDataOverlay(data) {
 }
 window.applyTrackerDataOverlay = applyTrackerDataOverlay;
 
-function runSearch() {
-  const val = document.getElementById('search-input').value.trim().toLowerCase();
+async function runSearch() {
+  const rawVal = document.getElementById('search-input').value.trim();
+  const val = rawVal.toLowerCase();
+  if (!val) return;
   const aliases = window.TRACKER_ALIASES || {
     'congress':'congress_core','rahul gandhi':'congress_core','sonia gandhi':'congress_core','mallikarjun kharge':'congress_core',
     'priyanka gandhi':'congress_core','young indian':'congress_core','associated journals':'congress_core','national herald':'congress_core',
@@ -1667,27 +1676,55 @@ function runSearch() {
   const aliasMatch = Object.keys(aliases).find(a => val.includes(a));
   if (aliasMatch) { loadEntity(aliases[aliasMatch]); return; }
   const match = Object.keys(CONGRESS_MAP).find(k => CONGRESS_MAP[k].name.toLowerCase().includes(val) || k.includes(val));
-  if (match) loadEntity(match);
-  else alert('Entity not in dataset. Try Congress Core, TMC Core, AAP Core, UBT Core, DMK Core, SP Core, RJD Core, BJD Core, AIMIM Core, NC Core, PDP Core, or SAD Core.');
+  if (match) { loadEntity(match); return; }
+
+  const liveOntology = await Promise.resolve(window.SANSAD_ONTOLOGY_PROMISE).catch(() => null);
+  if (liveOntology && typeof window.findSansadMember === 'function') {
+    const liveMember = window.findSansadMember(rawVal);
+    if (liveMember) {
+      if (typeof window.loadSansadMember === 'function') {
+        window.loadSansadMember(liveMember);
+      } else if (typeof window.loadEntityObject === 'function') {
+        window.loadEntityObject(liveMember);
+      }
+      return;
+    }
+  }
+
+  alert('Entity not in static dataset or live Sansad ontology. Try Congress Core, TMC Core, AAP Core, UBT Core, DMK Core, SP Core, RJD Core, BJD Core, AIMIM Core, NC Core, PDP Core, or SAD Core.');
 }
 document.getElementById('search-input').addEventListener('keydown', e => { if(e.key==='Enter') runSearch(); });
 
-function loadEntity(key) {
-  const entity = CONGRESS_MAP[key];
+function loadEntityObject(entity, options = {}) {
   if (!entity) return;
+  const { animate = true, syncSearchInput = true } = options;
   const toggle = document.getElementById('quick-options-toggle');
   if (toggle && window.matchMedia('(max-width: 640px)').matches) {
     toggle.checked = false;
   }
-  document.getElementById('search-input').value = entity.name;
-  currentEntity = entity;
-  animateLoading(() => {
+  if (syncSearchInput) {
+    document.getElementById('search-input').value = entity.name || entity.label || '';
+  }
+  setCurrentEntity(entity);
+  const renderCurrentEntity = () => {
     renderGraph(entity);
     renderSidebarEntity(entity);
     document.getElementById('graph-empty').style.display = 'none';
     document.getElementById('graph-legend').classList.add('visible');
     document.getElementById('sidebar-status').textContent = 'LOADED';
-  });
+  };
+  if (animate) {
+    animateLoading(renderCurrentEntity);
+  } else {
+    renderCurrentEntity();
+  }
+}
+window.loadEntityObject = loadEntityObject;
+
+function loadEntity(key) {
+  const entity = CONGRESS_MAP[key];
+  if (!entity) return;
+  loadEntityObject(entity);
 }
 
 function animateLoading(cb) {
@@ -2031,4 +2068,9 @@ function toggleLabels() {
 
 // â”€â”€â”€ INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Promise.resolve(window.TRACKER_DATA_PROMISE).then(applyTrackerDataOverlay).catch(() => {});
+if (window.__PENDING_SANSAD_ENTITY__ && typeof window.loadEntityObject === 'function') {
+  const pendingSansadEntity = window.__PENDING_SANSAD_ENTITY__;
+  window.__PENDING_SANSAD_ENTITY__ = null;
+  window.loadEntityObject(pendingSansadEntity, { animate: false });
+}
 window.addEventListener('resize', () => { if(currentEntity) renderGraph(currentEntity); });

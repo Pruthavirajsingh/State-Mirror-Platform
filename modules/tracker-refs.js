@@ -9,6 +9,12 @@
   const referenceForNode = (node, entity) => {
     const label = normalizeRefQuery(node.label || node.name || entity?.name || '');
     const context = normalizeRefQuery(`${label} ${entity?.name || ''} ${node.desc || ''}`);
+    if (node?.sourceUrl) {
+      return { href: node.sourceUrl, label: 'Official source', kind: 'source' };
+    }
+    if (entity?.sourceUrl && node.type === 'person') {
+      return { href: entity.sourceUrl, label: 'Official profile', kind: 'source' };
+    }
     if (node.type === 'person') {
       return { href: wikipediaSearchUrl(label), label: 'Wikipedia profile', kind: 'wiki' };
     }
@@ -20,6 +26,9 @@
   const referenceForEntity = (entity) => {
     const label = normalizeRefQuery(entity?.name || entity?.id || '');
     const context = normalizeRefQuery(`${label} ${entity?.desc || ''}`);
+    if (entity?.sourceUrl) {
+      return { href: entity.sourceUrl, label: 'Official profile', kind: 'source' };
+    }
     if (/person/i.test(entity?.type)) {
       return { href: wikipediaSearchUrl(label), label: 'Wikipedia profile', kind: 'wiki' };
     }
