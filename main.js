@@ -1421,24 +1421,21 @@ const PARTY_SYMBOLS = {
 };
 
 // â”€â”€â”€ SEARCH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function normalizeRefQuery(value) {
+const trackerRefs = window.TrackerRefs || {};
+const normalizeRefQuery = trackerRefs.normalizeRefQuery || function(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
-}
-
-function wikipediaSearchUrl(query) {
+};
+const wikipediaSearchUrl = trackerRefs.wikipediaSearchUrl || function(query) {
   return `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(normalizeRefQuery(query))}`;
-}
-
-function newsSearchUrl(query) {
+};
+const newsSearchUrl = trackerRefs.newsSearchUrl || function(query) {
   return `https://news.google.com/search?q=${encodeURIComponent(normalizeRefQuery(query))}`;
-}
-
-function isCaseLike(node = {}) {
+};
+const isCaseLike = trackerRefs.isCaseLike || function(node = {}) {
   const haystack = normalizeRefQuery(`${node.label || ''} ${node.desc || ''} ${node.type || ''}`).toLowerCase();
   return /case|controvers|probe|bail|raid|summons|scam|fir|criminal|assets|allegation|arrest|charges|court|legal|money laundering|disproportionate|ed |acb|cbi/.test(haystack);
-}
-
-function referenceForNode(node, entity) {
+};
+const referenceForNode = trackerRefs.referenceForNode || function(node, entity) {
   const label = normalizeRefQuery(node.label || node.name || entity?.name || '');
   const context = normalizeRefQuery(`${label} ${entity?.name || ''} ${node.desc || ''}`);
   if (node.type === 'person') {
@@ -1448,9 +1445,8 @@ function referenceForNode(node, entity) {
     return { href: newsSearchUrl(context), label: 'News coverage', kind: 'news' };
   }
   return { href: wikipediaSearchUrl(context || label), label: 'Web reference', kind: 'wiki' };
-}
-
-function referenceForEntity(entity) {
+};
+const referenceForEntity = trackerRefs.referenceForEntity || function(entity) {
   const label = normalizeRefQuery(entity?.name || entity?.id || '');
   const context = normalizeRefQuery(`${label} ${entity?.desc || ''}`);
   if (/person/i.test(entity?.type)) {
@@ -1460,11 +1456,41 @@ function referenceForEntity(entity) {
     return { href: newsSearchUrl(context), label: 'News coverage', kind: 'news' };
   }
   return { href: wikipediaSearchUrl(context || label), label: 'Web reference', kind: 'wiki' };
+};
+
+function applyTrackerDataOverlay(data) {
+  if (!data || typeof data !== 'object') return;
+  if (data.congressMap && typeof data.congressMap === 'object') {
+    Object.entries(data.congressMap).forEach(([key, entity]) => {
+      CONGRESS_MAP[key] = entity;
+    });
+  }
+  if (data.typeColor && typeof data.typeColor === 'object') {
+    Object.assign(TYPE_COLOR, data.typeColor);
+  }
+  if (data.linkColor && typeof data.linkColor === 'object') {
+    Object.assign(LINK_COLOR, data.linkColor);
+  }
+  if (data.partySymbols && typeof data.partySymbols === 'object') {
+    Object.assign(PARTY_SYMBOLS, data.partySymbols);
+  }
+  if (data.searchAliases && typeof data.searchAliases === 'object') {
+    window.TRACKER_ALIASES = data.searchAliases;
+  }
+  window.TRACKER_DATA = data;
+  if (currentEntity && currentEntity.id && CONGRESS_MAP[currentEntity.id]) {
+    currentEntity = CONGRESS_MAP[currentEntity.id];
+  }
+  if (currentEntity) {
+    renderGraph(currentEntity);
+    renderSidebarEntity(currentEntity);
+  }
 }
+window.applyTrackerDataOverlay = applyTrackerDataOverlay;
 
 function runSearch() {
   const val = document.getElementById('search-input').value.trim().toLowerCase();
-  const aliases = {
+  const aliases = window.TRACKER_ALIASES || {
     'congress':'congress_core','rahul gandhi':'congress_core','sonia gandhi':'congress_core','mallikarjun kharge':'congress_core',
     'priyanka gandhi':'congress_core','young indian':'congress_core','associated journals':'congress_core','national herald':'congress_core',
     'motilal vora':'congress_core','oscar fernandes':'congress_core','suman dubey':'congress_core','sam pitroda':'congress_core',
@@ -1879,4 +1905,5 @@ function toggleLabels() {
 }
 
 // â”€â”€â”€ INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+Promise.resolve(window.TRACKER_DATA_PROMISE).then(applyTrackerDataOverlay).catch(() => {});
 window.addEventListener('resize', () => { if(currentEntity) renderGraph(currentEntity); });
