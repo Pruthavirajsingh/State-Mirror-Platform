@@ -1354,19 +1354,19 @@ const PARTY_SYMBOLS = {
   tmc_core: {
     name: 'Jora Ghas Phul',
     glyph: '🌱',
-    image: partySymbol('tmc'),
+    image: partySymbol('tmc-trinamool'),
     note: 'Trinamool Congress symbol'
   },
   tmc_wealth: {
     name: 'Jora Ghas Phul',
     glyph: '🌱',
-    image: partySymbol('tmc'),
+    image: partySymbol('tmc-trinamool'),
     note: 'TMC-linked wealth network'
   },
   tmc_legal: {
     name: 'Jora Ghas Phul',
     glyph: '🌱',
-    image: partySymbol('tmc'),
+    image: partySymbol('tmc-trinamool'),
     note: 'TMC faction symbol'
   },
   aap_core: {
