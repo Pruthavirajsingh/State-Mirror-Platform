@@ -1,745 +1,1882 @@
-const rows = [
-  {
-    category: "Party-Owned Entity",
-    name: "Indian National Congress",
-    associated: "Indian National Congress",
-    relation: "Registered Political Party",
-    details: "National political party founded in 1885; based in New Delhi [citation:6]",
+// â”€â”€â”€ DATA LAYER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const ENTITIES = {};
+const CONGRESS_MAP = {
+  congress_core: {
+    id: 'congress_core',
+    name: 'Indian National Congress Network',
+    type: 'root',
+    desc: 'Core Congress network around the party, Young Indian, AJL, National Herald, and the Gandhi family.',
+    founded: 1885,
+    hq: 'New Delhi',
+    subsidiaries: 4,
+    govtLinks: 0,
+    globalExposure: 3,
+    marketCap: 'N/A',
+    riskLevel: 'HIGH',
+    nodes: [
+      { id:'inc', label:'Indian National Congress', type:'root', size:28, desc:'National political party founded in 1885. Root node for the network.' },
+      { id:'young', label:'Young Indian', type:'sub', size:18, desc:'Section 25 not-for-profit company floated by Sonia and Rahul Gandhi.' },
+      { id:'ajl', label:'Associated Journals', type:'sub', size:16, desc:'Company that owns National Herald assets.' },
+      { id:'herald', label:'National Herald', type:'sub', size:14, desc:'Congress-affiliated newspaper publication.' },
+      { id:'rahul', label:'Rahul Gandhi', type:'person', size:18, desc:'Congress leader; former party president.' },
+      { id:'sonia', label:'Sonia Gandhi', type:'person', size:18, desc:'Former party president; Rajya Sabha MP.' },
+      { id:'kharge', label:'Mallikarjun Kharge', type:'person', size:16, desc:'Current Congress President.' },
+      { id:'priyanka', label:'Priyanka Gandhi Vadra', type:'person', size:16, desc:'Congress General Secretary.' },
+      { id:'motilal', label:'Motilal Vora', type:'person', size:14, desc:'Former treasurer; chairman and MD of AJL.' },
+      { id:'oscar', label:'Oscar Fernandes', type:'person', size:14, desc:'Senior Congress leader and Young Indian shareholder.' },
+      { id:'suman', label:'Suman Dubey', type:'person', size:13, desc:'Managing committee member at Young Indian.' },
+      { id:'sam', label:'Sam Pitroda', type:'person', size:13, desc:'Technocrat and Young Indian director.' },
+      { id:'backops', label:'Backops Services', type:'sub', size:12, desc:'Business entity founded by Rahul Gandhi.' },
+      { id:'rgf', label:'Rajiv Gandhi Foundation', type:'sub', size:12, desc:'Charitable trust linked to Rahul Gandhi.' },
+      { id:'rgct', label:'Rajiv Gandhi Charitable Trust', type:'sub', size:12, desc:'Charitable trust linked to Rahul Gandhi.' },
+      { id:'sgb', label:'Sovereign Gold Bonds', type:'global', size:12, desc:'Government securities held by Rahul Gandhi.' },
+      { id:'gurugram', label:'Gurugram Property', type:'global', size:12, desc:'Commercial property owned by Rahul Gandhi.' },
+      { id:'agri', label:'Agricultural Properties', type:'global', size:12, desc:'Co-owned agricultural properties with Priyanka Gandhi Vadra.' },
+      { id:'nheraldcase', label:'National Herald Case', type:'flag', size:14, desc:'Controversy around AJL, Young Indian, and National Herald control.' },
+    ],
+    links: [
+      { source:'inc', target:'young', type:'control' },
+      { source:'inc', target:'ajl', type:'owns' },
+      { source:'ajl', target:'herald', type:'subsidiary' },
+      { source:'inc', target:'nheraldcase', type:'controversy' },
+      { source:'young', target:'nheraldcase', type:'controversy' },
+      { source:'rahul', target:'young', type:'control' },
+      { source:'sonia', target:'young', type:'control' },
+      { source:'kharge', target:'young', type:'control' },
+      { source:'priyanka', target:'agri', type:'investment' },
+      { source:'rahul', target:'backops', type:'owns' },
+      { source:'rahul', target:'rgf', type:'partner' },
+      { source:'rahul', target:'rgct', type:'partner' },
+      { source:'rahul', target:'sgb', type:'investment' },
+      { source:'rahul', target:'gurugram', type:'investment' },
+      { source:'rahul', target:'agri', type:'investment' },
+      { source:'motilal', target:'ajl', type:'control' },
+      { source:'motilal', target:'young', type:'subsidiary' },
+      { source:'oscar', target:'young', type:'subsidiary' },
+      { source:'suman', target:'young', type:'control' },
+      { source:'sam', target:'young', type:'control' },
+    ],
+    alerts: [
+      { level:'high', title:'Young Indian Structure', text:'Congress network centered on Young Indian, AJL, and National Herald; several leaders appear across the same control chain.' },
+      { level:'medium', title:'Family Ties', text:'Rahul, Sonia, and Priyanka nodes converge around trusts, assets, and Young Indian.' },
+      { level:'medium', title:'Press Asset', text:'National Herald node retained to preserve the historical AJL ownership chain.' },
+    ]
   },
-  {
-    category: "Party-Owned Entity",
-    name: "Young Indian Pvt Ltd",
-    associated: "Young Indian Pvt Ltd",
-    relation: "Section 25 Not-for-Profit Company",
-    details:
-      "Company floated by Sonia Gandhi and Rahul Gandhi; holds 76% shares combined [citation:1]",
-  },
-  {
-    category: "Party-Owned Entity",
-    name: "Associated Journals Limited",
-    associated: "Associated Journals Limited",
-    relation: "Public Limited Company",
-    details:
-      "Founded by Jawaharlal Nehru in 1938 to publish National Herald; later linked to Young Indian [citation:1]",
-  },
-  {
-    category: "Party-Owned Entity",
-    name: "National Herald",
-    associated: "Associated Journals Limited",
-    relation: "Newspaper Publication",
-    details: "Congress-affiliated newspaper; revival plans under Young Indian [citation:1]",
-  },
-  {
-    category: "Leader",
-    name: "Rahul Gandhi",
-    associated: "Rahul Gandhi",
-    relation: "Congress Leader",
-    details: "Former party president; son of Rajiv and Sonia Gandhi [citation:7][citation:10]",
-  },
-  {
-    category: "Leader",
-    name: "Rahul Gandhi",
-    associated: "Young Indian Pvt Ltd",
-    relation: "Director & Shareholder",
-    details: "Director of Young Indian; holds shares [citation:7]",
-  },
-  {
-    category: "Leader",
-    name: "Rahul Gandhi",
-    associated: "Rajiv Gandhi Foundation",
-    relation: "Trustee",
-    details: "Charitable trust [citation:10]",
-  },
-  {
-    category: "Leader",
-    name: "Rahul Gandhi",
-    associated: "Rajiv Gandhi Charitable Trust",
-    relation: "Trustee",
-    details: "Charitable trust [citation:10]",
-  },
-  {
-    category: "Leader",
-    name: "Rahul Gandhi",
-    associated: "Stock Portfolio - Pidilite Industries Ltd",
-    relation: "Listed Equity Investment",
-    details: "Approx Rs.44.4 lakh investment [citation:10]",
-  },
-  {
-    category: "Leader",
-    name: "Rahul Gandhi",
-    associated: "Mutual Funds",
-    relation: "Investment Portfolio",
-    details: "Total value Rs.3.8 crore [citation:2][citation:7]",
-  },
-  {
-    category: "Leader",
-    name: "Rahul Gandhi",
-    associated: "Commercial Property - Gurugram",
-    relation: "Real Estate Asset",
-    details: "Commercial property owned [citation:7]",
-  },
-  {
-    category: "Leader",
-    name: "Sonia Gandhi",
-    associated: "Sonia Gandhi",
-    relation: "Former Party President",
-    details: "Congress president until 2022; Rajya Sabha MP [citation:1][citation:8]",
-  },
-  {
-    category: "Leader",
-    name: "Sonia Gandhi",
-    associated: "Young Indian Pvt Ltd",
-    relation: "Director & Shareholder",
-    details: "Director of Young Indian; holds 38% shares [citation:1]",
-  },
-  {
-    category: "Leader",
-    name: "Mallikarjun Kharge",
-    associated: "Mallikarjun Kharge",
-    relation: "Congress President",
-    details: "Current Congress President; director at Young Indian [citation:7]",
-  },
-  {
-    category: "Leader",
-    name: "Mallikarjun Kharge",
-    associated: "Young Indian Pvt Ltd",
-    relation: "Director",
-    details: "Director of Young Indian [citation:7]",
-  },
-  {
-    category: "Leader",
-    name: "Priyanka Gandhi Vadra",
-    associated: "Priyanka Gandhi Vadra",
-    relation: "Congress General Secretary",
-    details: "Congress leader; co-owns agricultural properties with Rahul Gandhi [citation:7]",
-  },
-  {
-    category: "Leader",
-    name: "Priyanka Gandhi Vadra",
-    associated: "Agricultural Properties (co-owned with Rahul Gandhi)",
-    relation: "Real Estate Asset",
-    details: "Three agricultural properties including farmhouse [citation:7]",
-  },
-  {
-    category: "Leader",
-    name: "Motilal Vora",
-    associated: "Motilal Vora",
-    relation: "Senior Congress Leader",
-    details: "Former Congress treasurer; chairman and MD of Associated Journals Limited [citation:1]",
-  },
-  {
-    category: "Leader",
-    name: "Motilal Vora",
-    associated: "Associated Journals Limited",
-    relation: "Chairman & Managing Director",
-    details: "Chairman and Managing Director of the company owning National Herald [citation:1]",
-  },
-  {
-    category: "Leader",
-    name: "Oscar Fernandes",
-    associated: "Oscar Fernandes",
-    relation: "Senior Congress Leader",
-    details: "Former Union Minister [citation:1]",
-  },
-  {
-    category: "Leader",
-    name: "Oscar Fernandes",
-    associated: "Young Indian Pvt Ltd",
-    relation: "Shareholder",
-    details: "Held shares in Young Indian [citation:1]",
-  },
-  {
-    category: "Leader",
-    name: "Suman Dubey",
-    associated: "Suman Dubey",
-    relation: "Journalist/Technocrat",
-    details: "Former journalist; managing committee member at Young Indian [citation:1]",
-  },
-  {
-    category: "Leader",
-    name: "Suman Dubey",
-    associated: "Young Indian Pvt Ltd",
-    relation: "Managing Committee Member",
-    details: "Authorised signatory and director at Young Indian [citation:1]",
-  },
-  {
-    category: "Leader",
-    name: "Sam Pitroda",
-    associated: "Sam Pitroda",
-    relation: "Technocrat",
-    details: "Former advisor to Prime Minister; technology expert [citation:1]",
-  },
-  {
-    category: "Leader",
-    name: "Sam Pitroda",
-    associated: "Young Indian Pvt Ltd",
-    relation: "Director",
-    details: "Director at Young Indian [citation:1]",
-  },
-  {
-    category: "Leader",
-    name: "Abhishek Manu Singhvi",
-    associated: "Abhishek Manu Singhvi",
-    relation: "Rajya Sabha MP - Telangana",
-    details: "Senior advocate; Congress spokesperson [citation:3]",
-  },
-  {
-    category: "Leader",
-    name: "Abhishek Manu Singhvi",
-    associated: "Stock Portfolio - Listed Shares",
-    relation: "Listed Equity Investment",
-    details: "Declared listed shares worth approx Rs.190.82 crore [citation:3]",
-  },
-  {
-    category: "Leader",
-    name: "T. Subbarami Reddy",
-    associated: "T. Subbarami Reddy",
-    relation: "Former Congress MP",
-    details: "Former Congress MP; promoter of Gayatri Projects [citation:4]",
-  },
-  {
-    category: "Leader",
-    name: "T. Subbarami Reddy",
-    associated: "Gayatri Projects Ltd",
-    relation: "Promoter & Former CWC Invitee",
-    details: "Company received NCLT-approved bailout; large road and water contracts [citation:4]",
-  },
-  {
-    category: "Leader",
-    name: "A. Revanth Reddy",
-    associated: "A. Revanth Reddy",
-    relation: "Telangana CM",
-    details: "Telangana Chief Minister; Congress leader [citation:9]",
-  },
-  {
-    category: "Leader",
-    name: "A. Revanth Reddy",
-    associated: "KLSR Infratech",
-    relation: "Government Contractor (Alleged Link)",
-    details: "Company facing insolvency; awarded several contracts under Congress government [citation:9]",
-  },
-  {
-    category: "Party-Affiliated Entity",
-    name: "Sandur Power Company Ltd (SPCL)",
-    associated: "Sandur Power Company Ltd",
-    relation: "Power Company",
-    details: "Acquired by Y.S. Jagan Mohan Reddy in 2001 [citation:5]",
-  },
-  {
-    category: "Party-Affiliated Individual",
-    name: "Y.S. Jagan Mohan Reddy",
-    associated: "Y.S. Jagan Mohan Reddy",
-    relation: "Former Congress Leader",
-    details: "Former Congress MP; later founded YSRCP; served as Andhra Pradesh CM [citation:5]",
-  },
-  {
-    category: "Party-Affiliated Individual",
-    name: "Y.S. Jagan Mohan Reddy",
-    associated: "Sandur Power Company Ltd",
-    relation: "Business Owner",
-    details: "Acquired defunct power project and later sold shares [citation:5]",
-  },
-];
 
-const svg = document.querySelector("#graph");
-const searchInput = document.querySelector("#search-input");
-const quickSearches = document.querySelector("#quick-searches");
-const graphEmpty = document.querySelector("#graph-empty");
-const sidebarBody = document.querySelector("#sidebar-body");
-const sidebarStatus = document.querySelector("#sidebar-status");
-const loadingBar = document.querySelector("#loading");
-const tooltip = document.querySelector("#tooltip");
+  money_trail: {
+    id: 'money_trail',
+    name: 'Congress Wealth Network',
+    type: 'person',
+    desc: 'Affidavit-driven assets, portfolios, properties, and wealth disclosures across prominent Congress-linked leaders.',
+    founded: 2024,
+    hq: 'Delhi / Nationwide',
+    subsidiaries: 6,
+    govtLinks: 0,
+    globalExposure: 3,
+    marketCap: 'N/A',
+    riskLevel: 'MEDIUM',
+    nodes: [
+      { id:'abhishek', label:'Abhishek Manu Singhvi', type:'root', size:24, desc:'Rajya Sabha MP and senior advocate; major wealth disclosure node.' },
+      { id:'listed', label:'Listed Shares', type:'global', size:16, desc:'Declared listed shares worth approx Rs.190.82 crore.' },
+      { id:'mutuals', label:'Mutual Funds', type:'global', size:15, desc:'Declared mutual funds worth Rs.197.87 crore.' },
+      { id:'unlisted', label:'Unlisted Shares', type:'global', size:14, desc:'Declared unlisted shares worth Rs.33 crore.' },
+      { id:'loans', label:'Personal Loans Extended', type:'global', size:14, desc:'Extended personal loans of approx Rs.353.32 crore.' },
+      { id:'art', label:'Artwork & Paintings', type:'global', size:13, desc:'Valued at over Rs.25 crore.' },
+      { id:'jewel_self', label:'Jewellery - Self', type:'global', size:12, desc:'Valued at Rs.2.40 crore.' },
+      { id:'jewel_spouse', label:'Jewellery - Spouse', type:'global', size:12, desc:'Valued at Rs.157.53 crore.' },
+      { id:'neeti', label:'Neeti Bagh', type:'global', size:12, desc:'Residential property valued at Rs.20 crore.' },
+      { id:'sunder', label:'Sunder Nagar', type:'global', size:12, desc:'Residential property valued at Rs.35 crore.' },
+      { id:'alibaug', label:'Alibaug Land', type:'global', size:12, desc:'Agricultural land valued at Rs.5 crore.' },
+      { id:'mercedes', label:'Mercedes-Benz', type:'global', size:11, desc:'Vehicle worth Rs.1.7 crore.' },
+      { id:'seltos', label:'Kia Seltos', type:'global', size:11, desc:'Vehicle worth Rs.9.16 lakh.' },
+      { id:'carnival', label:'Kia Carnival', type:'global', size:11, desc:'Vehicle worth Rs.13.34 lakh.' },
+      { id:'networth', label:'Total Net Worth', type:'flag', size:14, desc:'Declared net worth over Rs.2,500 crore including spouse and HUF.' },
+      { id:'income', label:'FY 2024-25 Income', type:'flag', size:13, desc:'Annual income over Rs.374 crore reported.' },
+      { id:'ashok', label:'Ashok Chavan', type:'person', size:15, desc:'Former Maharashtra Chief Minister; later switched to BJP.' },
+      { id:'milind', label:'Milind Deora', type:'person', size:15, desc:'Former Congress leader from Maharashtra; later joined Shiv Sena.' },
+      { id:'praful', label:'Praful Patel', type:'person', size:15, desc:'NCP leader; formerly associated with Congress alliance.' },
+      { id:'jaya', label:'Jaya Bachchan', type:'person', size:15, desc:'Samajwadi Party MP; previously associated with Congress.' },
+      { id:'chidambaram', label:'P. Chidambaram', type:'person', size:15, desc:'Former Union Minister; senior Congress leader.' },
+      { id:'adhir', label:'Adhir Ranjan Chowdhury', type:'person', size:14, desc:'Former Leader of Opposition in Lok Sabha.' },
+      { id:'ashok_assets', label:'Declared Assets', type:'flag', size:12, desc:'Declared net worth of Rs.68 crore.' },
+      { id:'milind_assets', label:'Declared Assets', type:'flag', size:12, desc:'Assets valued at Rs.134 crore.' },
+      { id:'praful_assets', label:'Declared Assets', type:'flag', size:12, desc:'Declared total assets worth Rs.450 crore.' },
+      { id:'jaya_assets', label:'Declared Assets', type:'flag', size:12, desc:'Declared assets worth Rs.1,578 crore with spouse Amitabh Bachchan.' },
+      { id:'zero', label:'Zero Investments', type:'flag', size:12, desc:'Adhir Ranjan Chowdhury declared zero investments.' },
+    ],
+    links: [
+      { source:'abhishek', target:'listed', type:'investment' },
+      { source:'abhishek', target:'mutuals', type:'investment' },
+      { source:'abhishek', target:'unlisted', type:'investment' },
+      { source:'abhishek', target:'loans', type:'investment' },
+      { source:'abhishek', target:'art', type:'investment' },
+      { source:'abhishek', target:'jewel_self', type:'investment' },
+      { source:'abhishek', target:'jewel_spouse', type:'investment' },
+      { source:'abhishek', target:'neeti', type:'investment' },
+      { source:'abhishek', target:'sunder', type:'investment' },
+      { source:'abhishek', target:'alibaug', type:'investment' },
+      { source:'abhishek', target:'mercedes', type:'investment' },
+      { source:'abhishek', target:'seltos', type:'investment' },
+      { source:'abhishek', target:'carnival', type:'investment' },
+      { source:'abhishek', target:'networth', type:'controversy' },
+      { source:'abhishek', target:'income', type:'controversy' },
+      { source:'ashok', target:'ashok_assets', type:'controversy' },
+      { source:'milind', target:'milind_assets', type:'controversy' },
+      { source:'praful', target:'praful_assets', type:'controversy' },
+      { source:'jaya', target:'jaya_assets', type:'controversy' },
+      { source:'chidambaram', target:'networth', type:'global' },
+      { source:'adhir', target:'zero', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'Wealth Concentration', text:'Abhishek Manu Singhvi dominates the wealth map with property, securities, loans, and luxury assets.' },
+      { level:'medium', title:'Political Affluence', text:'Ashok Chavan, Milind Deora, Praful Patel, and Jaya Bachchan appear as separate asset-heavy nodes.' },
+      { level:'low', title:'Disclosure Contrast', text:'Adhir Ranjan Chowdhury appears as a zero-investment outlier.' },
+    ]
+  },
 
-const width = 1600;
-const height = 1000;
-const centers = {
-  core: { x: 380, y: 300 },
-  leader: { x: 750, y: 320 },
-  company: { x: 1110, y: 330 },
-  asset: { x: 1030, y: 690 },
-  other: { x: 570, y: 720 },
+  infra_links: {
+    id: 'infra_links',
+    name: 'Infrastructure Links',
+    type: 'govt',
+    desc: 'Contracts, projects, and regulatory touchpoints around Gayatri Projects, Revanth Reddy, KLSR, and allies.',
+    founded: 2020,
+    hq: 'Hyderabad',
+    subsidiaries: 4,
+    govtLinks: 3,
+    globalExposure: 0,
+    marketCap: 'N/A',
+    riskLevel: 'HIGH',
+    nodes: [
+      { id:'tsr', label:'T. Subbarami Reddy', type:'root', size:24, desc:'Former Congress MP and promoter of Gayatri Projects.' },
+      { id:'gayatri', label:'Gayatri Projects', type:'sub', size:18, desc:'Infrastructure company with large road and water contracts.' },
+      { id:'nhai', label:'NHAI Contracts', type:'global', size:15, desc:'Highway packages and expressway contracts.' },
+      { id:'jal', label:'Jal Jeevan Mission', type:'global', size:14, desc:'Water distribution works worth Rs.2,485 crore.' },
+      { id:'komatireddy', label:'Komatireddy Venkat Reddy', type:'person', size:15, desc:'Telangana Roads and Buildings Minister.' },
+      { id:'revanth', label:'A. Revanth Reddy', type:'person', size:16, desc:'Telangana Chief Minister; Congress leader.' },
+      { id:'klsr', label:'KLSR Infratech', type:'sub', size:16, desc:'Government contractor facing insolvency proceedings.' },
+      { id:'bailout', label:'NCLT Bailout', type:'flag', size:13, desc:'Gayatri Projects received an NCLT-approved bailout.' },
+      { id:'contracts', label:'Project Pipeline', type:'flag', size:13, desc:'Multiple contract awards and write-offs connected to the group.' },
+    ],
+    links: [
+      { source:'tsr', target:'gayatri', type:'control' },
+      { source:'gayatri', target:'nhai', type:'govtlink', strong:true },
+      { source:'gayatri', target:'jal', type:'govtlink' },
+      { source:'gayatri', target:'bailout', type:'controversy' },
+      { source:'gayatri', target:'contracts', type:'controversy' },
+      { source:'komatireddy', target:'gayatri', type:'govtlink' },
+      { source:'revanth', target:'klsr', type:'govtlink', strong:true },
+      { source:'tsr', target:'bailout', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'Gayatri Projects', text:'NCLT-approved bailout, large highway packages, and multi-year water contracts define the network.' },
+      { level:'medium', title:'Political Touchpoints', text:'Komatireddy Venkat Reddy and A. Revanth Reddy appear on the regulatory and contractor edges.' },
+    ]
+  },
+
+  jagan_links: {
+    id: 'jagan_links',
+    name: 'Y.S. Jagan Links',
+    type: 'family',
+    desc: 'Sandur Power ownership and Y.S. Jagan Mohan Reddy\'s early Congress-era business ties.',
+    founded: 2001,
+    hq: 'Andhra Pradesh',
+    subsidiaries: 2,
+    govtLinks: 0,
+    globalExposure: 0,
+    marketCap: 'N/A',
+    riskLevel: 'HIGH',
+    nodes: [
+      { id:'jagan', label:'Y.S. Jagan Mohan Reddy', type:'root', size:24, desc:'Former Congress MP from Kadapa; later founded YSRCP and became Andhra Pradesh CM.' },
+      { id:'sandur', label:'Sandur Power Company Ltd', type:'sub', size:18, desc:'Acquired by Jagan in 2001 from the original promoter.' },
+      { id:'bharathi', label:'Y.S. Bharathi', type:'person', size:15, desc:'Later headed the company after the acquisition.' },
+      { id:'switch', label:'Congress to YSRCP', type:'flag', size:13, desc:'Political break after early Congress-era business links.' },
+      { id:'assets', label:'Declared Assets', type:'global', size:13, desc:'Total assets Rs.510 crore declared by Jagan Mohan Reddy.' },
+    ],
+    links: [
+      { source:'jagan', target:'sandur', type:'control' },
+      { source:'sandur', target:'bharathi', type:'partner' },
+      { source:'jagan', target:'switch', type:'controversy' },
+      { source:'jagan', target:'assets', type:'investment' },
+    ],
+    alerts: [
+      { level:'high', title:'Sandur Power', text:'The Sandur Power link preserves the Congress-era acquisition and later share-sale story.' },
+      { level:'medium', title:'Party Shift', text:'Jagan Mohan Reddy moved from Congress to YSRCP after the 2009 Kadapa seat win.' },
+    ]
+  },
+
+  tmc_core: {
+    id: 'tmc_core',
+    name: 'Trinamool Congress Network',
+    type: 'root',
+    desc: 'TMC party funding, statewide leadership, and the main election affidavit nodes from 2026.',
+    founded: 1998,
+    hq: 'Kolkata',
+    subsidiaries: 4,
+    govtLinks: 0,
+    globalExposure: 2,
+    marketCap: 'N/A',
+    riskLevel: 'MEDIUM',
+    nodes: [
+      { id:'tmc', label:'Trinamool Congress', type:'root', size:28, desc:'West Bengal-based political party founded in 1998.' },
+      { id:'trusts', label:'Electoral Trusts', type:'global', size:16, desc:'Funding channel that delivered Rs.102 crore to TMC in FY25.' },
+      { id:'mamata', label:'Mamata Banerjee', type:'person', size:20, desc:'TMC leader and West Bengal Chief Minister.' },
+      { id:'kunal', label:'Kunal Ghosh', type:'person', size:14, desc:'TMC spokesperson; public response on ED actions.' },
+      { id:'debashis', label:'Debashis Kumar', type:'person', size:16, desc:'TMC MLA and Rashbehari candidate summoned by ED.' },
+      { id:'adhib', label:'Suvendu Adhikari', type:'flag', size:15, desc:'Former TMC leader now in BJP; 25 criminal cases reported in 2026 affidavit.' },
+      { id:'prakash', label:'Prakash Chik Baraik', type:'global', size:12, desc:'Poorest TMC Rajya Sabha MP in the ADR review.' },
+      { id:'cases', label:'Criminal Case Review', type:'flag', size:13, desc:'TMC MPs with declared criminal cases in the March 2026 ADR study.' },
+      { id:'funding', label:'FY25 Donations', type:'flag', size:14, desc:'TMC received Rs.102 crore from electoral trusts in FY 2024-25.' },
+    ],
+    links: [
+      { source:'tmc', target:'trusts', type:'investment' },
+      { source:'tmc', target:'mamata', type:'control' },
+      { source:'tmc', target:'debashis', type:'controversy' },
+      { source:'tmc', target:'cases', type:'controversy' },
+      { source:'mamata', target:'funding', type:'investment' },
+      { source:'debashis', target:'cases', type:'controversy' },
+      { source:'kunal', target:'debashis', type:'partner' },
+      { source:'adhib', target:'cases', type:'controversy' },
+      { source:'prakash', target:'cases', type:'global' },
+    ],
+    alerts: [
+      { level:'high', title:'Party Funding', text:'TMC received Rs.102 crore from electoral trusts in FY 2024-25.' },
+      { level:'medium', title:'ED Summons', text:'Debashis Kumar was summoned by the ED in a land-grabbing case on March 30, 2026.' },
+      { level:'medium', title:'Rajya Sabha Snapshot', text:'The March 2026 ADR review shows 4 of 13 TMC Rajya Sabha MPs with criminal cases.' },
+    ]
+  },
+
+  tmc_wealth: {
+    id: 'tmc_wealth',
+    name: 'TMC Wealth Network',
+    type: 'person',
+    desc: 'Top wealth disclosures from TMC candidates in the 2026 West Bengal Assembly election affidavits.',
+    founded: 2026,
+    hq: 'West Bengal',
+    subsidiaries: 6,
+    govtLinks: 0,
+    globalExposure: 1,
+    marketCap: 'N/A',
+    riskLevel: 'MEDIUM',
+    nodes: [
+      { id:'jakir', label:'Jakir Hossain', type:'root', size:24, desc:'Jangipur candidate with the highest declared assets in the TMC list.' },
+      { id:'ahmed', label:'Ahmed Javed Khan', type:'person', size:18, desc:'Kasba candidate with substantial asset disclosures.' },
+      { id:'vivek', label:'Vivek Gupta', type:'person', size:18, desc:'Jorasanko candidate with major movable and immovable holdings.' },
+      { id:'manoj', label:'Manoj Tiwary', type:'person', size:17, desc:'Shibpur candidate and former cricketer.' },
+      { id:'bayron', label:'Bayron Biswas', type:'person', size:17, desc:'Sagardighi candidate.' },
+      { id:'pradip', label:'Pradip Mazumdar', type:'person', size:16, desc:'Durgapur Purba candidate.' },
+      { id:'nandita', label:'Nandita Chowdhury', type:'person', size:15, desc:'Howrah Dakshin candidate.' },
+      { id:'asok', label:'Dr. Asok Kumar Chattopadhyay', type:'person', size:15, desc:'Hansan candidate.' },
+      { id:'dulal', label:'Dulal Chandra Das', type:'person', size:14, desc:'Maheshtala candidate.' },
+      { id:'assets', label:'Declared Assets', type:'flag', size:14, desc:'Affidavit disclosures analyzed by ADR for the TMC list.' },
+      { id:'movable', label:'Movable Assets', type:'global', size:12, desc:'Cash, investments, and other movable holdings.' },
+      { id:'immovable', label:'Immovable Assets', type:'global', size:12, desc:'Real estate and landholdings declared in affidavits.' },
+    ],
+    links: [
+      { source:'jakir', target:'assets', type:'investment' },
+      { source:'jakir', target:'movable', type:'investment' },
+      { source:'jakir', target:'immovable', type:'investment' },
+      { source:'ahmed', target:'assets', type:'investment' },
+      { source:'vivek', target:'assets', type:'investment' },
+      { source:'manoj', target:'assets', type:'investment' },
+      { source:'bayron', target:'assets', type:'investment' },
+      { source:'pradip', target:'assets', type:'investment' },
+      { source:'nandita', target:'assets', type:'investment' },
+      { source:'asok', target:'assets', type:'investment' },
+      { source:'dulal', target:'assets', type:'investment' },
+    ],
+    alerts: [
+      { level:'high', title:'Top Candidate', text:'Jakir Hossain leads the TMC wealth map with Rs.67.07 crore in declared assets.' },
+      { level:'medium', title:'Wide Asset Spread', text:'The top 10 TMC candidates cluster around mixed movable and immovable holdings.' },
+    ]
+  },
+
+  tmc_legal: {
+    id: 'tmc_legal',
+    name: 'TMC Legal & Controversy',
+    type: 'flag',
+    desc: 'ED actions, criminal case counts, and party response nodes connected to TMC in 2026.',
+    founded: 2026,
+    hq: 'Kolkata',
+    subsidiaries: 3,
+    govtLinks: 1,
+    globalExposure: 0,
+    marketCap: 'N/A',
+    riskLevel: 'HIGH',
+    nodes: [
+      { id:'ed', label:'ED Summons', type:'root', size:22, desc:'Enforcement Directorate actions around TMC-linked cases.' },
+      { id:'debashis', label:'Debashis Kumar', type:'person', size:18, desc:'Summoned by the ED on March 30, 2026.' },
+      { id:'kunal', label:'Kunal Ghosh', type:'person', size:15, desc:'TMC response voice alleging agency misuse.' },
+      { id:'suvendu', label:'Suvendu Adhikari', type:'flag', size:17, desc:'Former TMC leader now in BJP; 25 criminal cases in affidavit.' },
+      { id:'cases', label:'Criminal Cases', type:'flag', size:14, desc:'TMC MPs and defectors with declared criminal cases.' },
+      { id:'hc', label:'Calcutta HC', type:'govt', size:13, desc:'Quashed 15 cases against Suvendu Adhikari in October 2025.' },
+      { id:'polls', label:'2026 Election Cycle', type:'global', size:12, desc:'West Bengal Assembly election window in the background.' },
+    ],
+    links: [
+      { source:'ed', target:'debashis', type:'controversy' },
+      { source:'debashis', target:'cases', type:'controversy' },
+      { source:'kunal', target:'ed', type:'partner' },
+      { source:'suvendu', target:'cases', type:'controversy' },
+      { source:'suvendu', target:'hc', type:'govtlink' },
+      { source:'ed', target:'polls', type:'investigating' },
+    ],
+    alerts: [
+      { level:'high', title:'ED Matter', text:'Debashis Kumar was summoned in a land-grabbing case on March 30, 2026.' },
+      { level:'medium', title:'Defection Trail', text:'Suvendu Adhikari now sits in BJP with 25 declared criminal cases in the 2026 affidavit.' },
+      { level:'low', title:'Court Action', text:'The Calcutta High Court quashed 15 cases against Suvendu in October 2025.' },
+    ]
+  },
+
+  aap_core: {
+    id: 'aap_core',
+    name: 'Aam Aadmi Party Network',
+    type: 'root',
+    desc: 'AAP funding, donor concentration, and the key political and asset nodes from recent ADR disclosures.',
+    founded: 2012,
+    hq: 'New Delhi',
+    subsidiaries: 4,
+    govtLinks: 0,
+    globalExposure: 2,
+    marketCap: 'N/A',
+    riskLevel: 'MEDIUM',
+    nodes: [
+      { id:'aap', label:'Aam Aadmi Party', type:'root', size:28, desc:'Political party formed in 2012.' },
+      { id:'prudent', label:'Prudent Electoral Trust', type:'global', size:18, desc:'Key donor channel providing Rs.16.418 crore in FY25.' },
+      { id:'donations', label:'FY 2024-25 Donations', type:'flag', size:17, desc:'AAP declared Rs.38.106 crore from 2,554 donations.' },
+      { id:'yoy', label:'YoY Growth', type:'flag', size:14, desc:'Donation growth of 244% from the prior fiscal year.' },
+      { id:'arvind', label:'Arvind Kejriwal', type:'person', size:18, desc:'AAP founder and former Delhi Chief Minister.' },
+      { id:'rajinder', label:'Rajinder Gupta', type:'person', size:16, desc:'Richest AAP Rajya Sabha MP; assets above Rs.5,053 crore.' },
+      { id:'balbir', label:'Sant Balbir Singh', type:'person', size:14, desc:'Poorest AAP Rajya Sabha MP in the ADR review.' },
+      { id:'cases', label:'Criminal Case Review', type:'flag', size:13, desc:'4 of 10 AAP Rajya Sabha MPs declared criminal cases.' },
+      { id:'individuals', label:'Individual Donors', type:'sub', size:13, desc:'AAP donations were primarily from individual contributors.' },
+      { id:'companies', label:'Corporate Donors', type:'sub', size:12, desc:'Only 17 companies contributed Rs.90.3 lakh total.' },
+    ],
+    links: [
+      { source:'aap', target:'prudent', type:'investment' },
+      { source:'aap', target:'donations', type:'control' },
+      { source:'aap', target:'yoy', type:'controversy' },
+      { source:'aap', target:'arvind', type:'control' },
+      { source:'aap', target:'rajinder', type:'investment' },
+      { source:'aap', target:'balbir', type:'investment' },
+      { source:'aap', target:'cases', type:'controversy' },
+      { source:'donations', target:'individuals', type:'investment' },
+      { source:'donations', target:'companies', type:'investment' },
+    ],
+    alerts: [
+      { level:'high', title:'Funding Surge', text:'AAP declared Rs.38.106 crore in FY 2024-25, up 244% from the previous year.' },
+      { level:'medium', title:'Trust Channel', text:'Prudent Electoral Trust contributed Rs.16.418 crore, or 43.08% of declared donations.' },
+      { level:'medium', title:'Rajya Sabha Snapshot', text:'AAP MPs show an unusually wide asset spread from lakhs to thousands of crores.' },
+    ]
+  },
+
+  aap_funding: {
+    id: 'aap_funding',
+    name: 'AAP Funding Network',
+    type: 'person',
+    desc: 'Party donations, donor concentration, and trust-linked funding for AAP in FY 2024-25.',
+    founded: 2024,
+    hq: 'India',
+    subsidiaries: 5,
+    govtLinks: 0,
+    globalExposure: 1,
+    marketCap: 'N/A',
+    riskLevel: 'MEDIUM',
+    nodes: [
+      { id:'amount', label:'Rs.38.106 crore', type:'root', size:26, desc:'Total donations above Rs.20,000 declared by AAP.' },
+      { id:'donors', label:'2,554 Donors', type:'global', size:16, desc:'Number of donation entries in FY25.' },
+      { id:'prudent', label:'Prudent Electoral Trust', type:'global', size:18, desc:'Donated Rs.16.4178 crore to AAP.' },
+      { id:'largest', label:'Talapadi Umashankar Shenoy', type:'person', size:15, desc:'Largest individual donor at Rs.37.74 lakh.' },
+      { id:'michael', label:'Michael D\'Souza', type:'person', size:14, desc:'Donated Rs.30 lakh.' },
+      { id:'bharatha', label:'Bharatha Swamukti Samsthe', type:'sub', size:14, desc:'Karnataka trust that donated Rs.30 lakh.' },
+      { id:'kuber', label:'Kuber Polyplast', type:'sub', size:13, desc:'Donated Rs.25 lakh.' },
+      { id:'advance', label:'Advance Chemicals', type:'sub', size:12, desc:'Donated Rs.11 lakh.' },
+      { id:'trustshare', label:'43.08% Trust Share', type:'flag', size:13, desc:'Share of AAP donations from Prudent Electoral Trust.' },
+      { id:'corp17', label:'17 Companies', type:'flag', size:12, desc:'Only 17 companies donated Rs.90.3 lakh.' },
+    ],
+    links: [
+      { source:'amount', target:'donors', type:'investment' },
+      { source:'amount', target:'prudent', type:'investment' },
+      { source:'amount', target:'largest', type:'investment' },
+      { source:'amount', target:'michael', type:'investment' },
+      { source:'amount', target:'bharatha', type:'investment' },
+      { source:'amount', target:'kuber', type:'investment' },
+      { source:'amount', target:'advance', type:'investment' },
+      { source:'prudent', target:'trustshare', type:'controversy' },
+      { source:'amount', target:'corp17', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'Main Number', text:'AAP received Rs.38.106 crore from 2,554 donations in FY 2024-25.' },
+      { level:'medium', title:'Trust Concentration', text:'Prudent Electoral Trust supplied Rs.16.418 crore, the largest single source.' },
+      { level:'low', title:'Donation Mix', text:'The party relied mostly on individual donors rather than corporations.' },
+    ]
+  },
+
+  aap_rajya: {
+    id: 'aap_rajya',
+    name: 'AAP Rajya Sabha Profile',
+    type: 'person',
+    desc: 'Assets and criminal case profile of AAP Rajya Sabha MPs in the March 2026 ADR review.',
+    founded: 2026,
+    hq: 'Rajya Sabha',
+    subsidiaries: 4,
+    govtLinks: 0,
+    globalExposure: 1,
+    marketCap: 'N/A',
+    riskLevel: 'HIGH',
+    nodes: [
+      { id:'avg', label:'Average Assets', type:'root', size:22, desc:'Average assets per AAP MP: Rs.574.09 crore.' },
+      { id:'rajinder2', label:'Rajinder Gupta', type:'person', size:18, desc:'Richest AAP MP with Rs.5,053+ crore assets.' },
+      { id:'balbir2', label:'Sant Balbir Singh', type:'person', size:15, desc:'Poorest AAP MP with about Rs.3 lakh.' },
+      { id:'cases4', label:'4 of 10 MPs', type:'flag', size:15, desc:'AAP MPs with declared criminal cases.' },
+      { id:'billionaires', label:'2 Billionaire MPs', type:'flag', size:14, desc:'AAP had 2 of 10 MPs with assets above Rs.100 crore.' },
+      { id:'national', label:'National Average', type:'global', size:12, desc:'73 of 229 MPs had criminal cases overall.' },
+      { id:'partycomp', label:'Party Comparison', type:'global', size:12, desc:'Congress, BJP, and TMC comparison markers in the ADR study.' },
+    ],
+    links: [
+      { source:'avg', target:'rajinder2', type:'investment' },
+      { source:'avg', target:'balbir2', type:'investment' },
+      { source:'avg', target:'cases4', type:'controversy' },
+      { source:'avg', target:'billionaires', type:'controversy' },
+      { source:'cases4', target:'national', type:'global' },
+      { source:'avg', target:'partycomp', type:'global' },
+    ],
+    alerts: [
+      { level:'high', title:'Asset Average', text:'AAP had the highest average Rajya Sabha MP assets among major parties at Rs.574.09 crore.' },
+      { level:'medium', title:'Billionaire Count', text:'2 of 10 AAP MPs were billionaires in the March 2026 ADR study.' },
+      { level:'medium', title:'Criminal Cases', text:'4 of 10 AAP MPs declared criminal cases, versus a 32% national average.' },
+    ]
+  },
+
+  ubt_core: {
+    id: 'ubt_core',
+    name: 'Shiv Sena (UBT) Network',
+    type: 'root',
+    desc: 'UBT faction leadership, party split context, and the major leaders and candidates from the latest reports.',
+    founded: 2022,
+    hq: 'Maharashtra',
+    subsidiaries: 4,
+    govtLinks: 0,
+    globalExposure: 2,
+    marketCap: 'N/A',
+    riskLevel: 'HIGH',
+    nodes: [
+      { id:'ubt', label:'Shiv Sena (UBT)', type:'root', size:28, desc:'Uddhav Balasaheb Thackeray faction of Shiv Sena.' },
+      { id:'uddhav', label:'Uddhav Thackeray', type:'person', size:20, desc:'Faction leader following the 2022 split.' },
+      { id:'sanjay', label:'Sanjay Raut', type:'person', size:18, desc:'Rajya Sabha MP and UBT spokesperson.' },
+      { id:'kishori', label:'Kishori Pednekar', type:'person', size:16, desc:'Former Mumbai Mayor and UBT candidate.' },
+      { id:'rajan', label:'Rajan Salvi', type:'person', size:16, desc:'Ratnagiri MLA facing an ACB disproportionate assets case.' },
+      { id:'aaditya', label:'Aaditya Thackeray', type:'person', size:16, desc:'Former minister and youth leader.' },
+      { id:'ravindra', label:'Ravindra Waikar', type:'person', size:15, desc:'UBT MLA raided by ED in a money laundering case.' },
+      { id:'symbol', label:'Flaming Torch', type:'global', size:14, desc:'UBT election symbol (mashal).' },
+      { id:'opposition', label:'Principal Opposition', type:'flag', size:13, desc:'UBT is the principal opposition in Maharashtra.' },
+      { id:'split', label:'2022 Party Split', type:'flag', size:13, desc:'Faction split after Eknath Shinde rebellion.' },
+    ],
+    links: [
+      { source:'ubt', target:'uddhav', type:'control' },
+      { source:'ubt', target:'sanjay', type:'control' },
+      { source:'ubt', target:'kishori', type:'control' },
+      { source:'ubt', target:'rajan', type:'controversy' },
+      { source:'ubt', target:'aaditya', type:'control' },
+      { source:'ubt', target:'ravindra', type:'controversy' },
+      { source:'ubt', target:'symbol', type:'global' },
+      { source:'ubt', target:'opposition', type:'control' },
+      { source:'ubt', target:'split', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'Faction Status', text:'UBT is the principal opposition in Maharashtra after the 2022 split.' },
+      { level:'medium', title:'Leader Assets', text:'Sanjay Raut and Kishori Pednekar headline the current UBT asset profile.' },
+      { level:'medium', title:'Legal Pressure', text:'Rajan Salvi and Ravindra Waikar are tied to active agency cases.' },
+    ]
+  },
+
+  ubt_legal: {
+    id: 'ubt_legal',
+    name: 'UBT Legal & Controversy',
+    type: 'flag',
+    desc: 'ACB, ED, and court actions around UBT leaders and candidates in 2024-2026.',
+    founded: 2024,
+    hq: 'Mumbai',
+    subsidiaries: 4,
+    govtLinks: 2,
+    globalExposure: 0,
+    marketCap: 'N/A',
+    riskLevel: 'HIGH',
+    nodes: [
+      { id:'salvi', label:'Rajan Salvi', type:'root', size:22, desc:'MLA in an ACB disproportionate assets case.' },
+      { id:'acb', label:'ACB Case', type:'govt', size:16, desc:'Case over disproportionate assets filed in Jan 2024.' },
+      { id:'bombayhc', label:'Bombay HC', type:'govt', size:16, desc:'Granted interim protection to Salvi family members.' },
+      { id:'suraj', label:'Suraj Chavan', type:'person', size:16, desc:'Yuva Sena leader arrested in BMC khichdi scam.' },
+      { id:'waikar', label:'Ravindra Waikar', type:'person', size:16, desc:'UBT MLA raided by ED in Jan 2024.' },
+      { id:'raut', label:'Sanjay Raut', type:'person', size:15, desc:'Spoke about pressure on UBT leaders.' },
+      { id:'cases', label:'Criminal / ED Cases', type:'flag', size:14, desc:'Combined legal pressure across the faction.' },
+      { id:'pressure', label:'Political Pressure', type:'flag', size:13, desc:'Alleged agency pressure on UBT leaders and allies.' },
+    ],
+    links: [
+      { source:'salvi', target:'acb', type:'controversy' },
+      { source:'salvi', target:'bombayhc', type:'govtlink' },
+      { source:'suraj', target:'cases', type:'controversy' },
+      { source:'waikar', target:'cases', type:'controversy' },
+      { source:'raut', target:'pressure', type:'controversy' },
+      { source:'salvi', target:'pressure', type:'controversy' },
+      { source:'waikar', target:'pressure', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'Salvi Case', text:'Rajan Salvi was booked by the ACB for alleged disproportionate assets.' },
+      { level:'medium', title:'ED / ACB Action', text:'Suraj Chavan and Ravindra Waikar were both tied to agency action in 2024.' },
+      { level:'medium', title:'Court Relief', text:'Bombay HC granted interim protection to Salvi family members.' },
+    ]
+  },
+
+  ubt_assets: {
+    id: 'ubt_assets',
+    name: 'UBT Assets Network',
+    type: 'person',
+    desc: 'Candidate asset disclosures and leader wealth details from the latest UBT-linked reports.',
+    founded: 2026,
+    hq: 'Maharashtra',
+    subsidiaries: 5,
+    govtLinks: 0,
+    globalExposure: 1,
+    marketCap: 'N/A',
+    riskLevel: 'MEDIUM',
+    nodes: [
+      { id:'kishori2', label:'Kishori Pednekar', type:'root', size:22, desc:'Former Mumbai Mayor; assets at Rs.5.26 crore.' },
+      { id:'sanjay2', label:'Sanjay Raut', type:'person', size:18, desc:'Assets at Rs.18.71 crore and 12 criminal cases.' },
+      { id:'rajan2', label:'Rajan Salvi', type:'person', size:17, desc:'Alleged disproportionate assets of Rs.3.53 crore.' },
+      { id:'sachin', label:'Sachin Padwal', type:'person', size:16, desc:'Ward 206 candidate with Rs.5.40 crore assets.' },
+      { id:'tejasvini', label:'Tejasvini Ghosalkar', type:'person', size:16, desc:'Ward 2 candidate; later defected to BJP.' },
+      { id:'assets', label:'Declared Assets', type:'flag', size:14, desc:'Local body candidate asset disclosures.' },
+      { id:'increase', label:'Asset Increase', type:'global', size:12, desc:'Large increases since 2017 for several candidates.' },
+      { id:'defection', label:'Defection Note', type:'flag', size:12, desc:'Tejasvini Ghosalkar left UBT for BJP in Dec 2025.' },
+    ],
+    links: [
+      { source:'kishori2', target:'assets', type:'investment' },
+      { source:'sanjay2', target:'assets', type:'investment' },
+      { source:'rajan2', target:'assets', type:'investment' },
+      { source:'sachin', target:'assets', type:'investment' },
+      { source:'tejasvini', target:'assets', type:'investment' },
+      { source:'kishori2', target:'increase', type:'global' },
+      { source:'sachin', target:'increase', type:'global' },
+      { source:'tejasvini', target:'defection', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'Top Asset Node', text:'Sanjay Raut and Kishori Pednekar anchor the current UBT asset profile.' },
+      { level:'medium', title:'Candidate Wealth', text:'Several local body candidates show large jumps from 2017 to 2026.' },
+      { level:'low', title:'Defection', text:'Tejasvini Ghosalkar defected to BJP before the polls.' },
+    ]
+  },
+
+  dmk_core: {
+    id: 'dmk_core',
+    name: 'DMK Funding & Leadership',
+    type: 'root',
+    desc: 'DMK party funding, Stalin assets, and major business connections including Future Gaming and Sun Group.',
+    founded: 1949,
+    hq: 'Chennai',
+    subsidiaries: 5,
+    govtLinks: 0,
+    globalExposure: 2,
+    marketCap: 'N/A',
+    riskLevel: 'HIGH',
+    nodes: [
+      { id:'dmk', label:'Dravida Munnetra Kazhagam', type:'root', size:28, desc:'DMK party root node.' },
+      { id:'stalin', label:'M. K. Stalin', type:'person', size:20, desc:'Chief Minister of Tamil Nadu; DMK President.' },
+      { id:'durga', label:'Durga Stalin', type:'person', size:15, desc:'Spouse assets declared in the March 2026 affidavit.' },
+      { id:'funding', label:'FY 2024-25 Contributions', type:'flag', size:18, desc:'DMK reported Rs.365 crore in total contributions.' },
+      { id:'pet', label:'Progressive Electoral Trust', type:'global', size:16, desc:'Tata-backed trust that donated Rs.10 crore to DMK.' },
+      { id:'future', label:'Future Gaming', type:'global', size:16, desc:'Largest historical electoral bond donor to DMK.' },
+      { id:'megha', label:'Megha Engineering', type:'sub', size:14, desc:'Second largest historical donor to DMK via bonds.' },
+      { id:'sungroup', label:'Sun Group', type:'global', size:15, desc:'Media conglomerate linked through Dayanidhi Maran family ties.' },
+      { id:'clean', label:'No Criminal Cases', type:'flag', size:13, desc:'Stalin declared no criminal cases.' },
+      { id:'income', label:'Annual Income', type:'flag', size:13, desc:'Stalin reported Rs.30.94 lakh annual income.' },
+    ],
+    links: [
+      { source:'dmk', target:'stalin', type:'control' },
+      { source:'stalin', target:'durga', type:'partner' },
+      { source:'dmk', target:'funding', type:'control' },
+      { source:'dmk', target:'pet', type:'investment' },
+      { source:'dmk', target:'future', type:'investment' },
+      { source:'dmk', target:'megha', type:'investment' },
+      { source:'stalin', target:'clean', type:'global' },
+      { source:'stalin', target:'income', type:'global' },
+      { source:'dmk', target:'sungroup', type:'global' },
+    ],
+    alerts: [
+      { level:'high', title:'Funding Spike', text:'DMK contributions rose to Rs.365 crore in FY 2024-25, ahead of the 2026 Tamil Nadu polls.' },
+      { level:'medium', title:'Trust Channel', text:'Progressive Electoral Trust donated Rs.10 crore to DMK in FY 2024-25.' },
+      { level:'medium', title:'Historical Donors', text:'Future Gaming and Megha Engineering were major electoral bond donors to DMK.' },
+    ]
+  },
+
+  dmk_rajya: {
+    id: 'dmk_rajya',
+    name: 'DMK Rajya Sabha Profile',
+    type: 'person',
+    desc: 'ADR snapshot of DMK Rajya Sabha MPs, assets, and criminal case counts.',
+    founded: 2026,
+    hq: 'Rajya Sabha',
+    subsidiaries: 4,
+    govtLinks: 0,
+    globalExposure: 1,
+    marketCap: 'N/A',
+    riskLevel: 'MEDIUM',
+    nodes: [
+      { id:'avg', label:'Average Assets', type:'root', size:22, desc:'Average DMK Rajya Sabha MP assets: Rs.11.90 crore.' },
+      { id:'mps', label:'8 MPs Analysed', type:'global', size:15, desc:'Number of DMK RS MPs in the ADR analysis.' },
+      { id:'cases', label:'2 of 8 MPs', type:'flag', size:15, desc:'DMK MPs with declared criminal cases.' },
+      { id:'serious', label:'Serious Cases', type:'flag', size:13, desc:'Serious-case count not separately specified for DMK.' },
+      { id:'billionaire', label:'0 Billionaire MPs', type:'flag', size:13, desc:'No DMK Rajya Sabha MP crossed Rs.100 crore.' },
+      { id:'national', label:'All-India Average', type:'global', size:12, desc:'All MPs average assets: Rs.120.69 crore.' },
+      { id:'compare', label:'Party Comparison', type:'global', size:12, desc:'DMK sits below Congress, BJP, AAP and others on wealth averages.' },
+    ],
+    links: [
+      { source:'avg', target:'mps', type:'investment' },
+      { source:'avg', target:'cases', type:'controversy' },
+      { source:'avg', target:'serious', type:'controversy' },
+      { source:'avg', target:'billionaire', type:'global' },
+      { source:'cases', target:'national', type:'global' },
+      { source:'avg', target:'compare', type:'global' },
+    ],
+    alerts: [
+      { level:'high', title:'Asset Average', text:'DMK Rajya Sabha MPs averaged Rs.11.90 crore in assets.' },
+      { level:'medium', title:'Criminal Cases', text:'2 of 8 DMK MPs declared criminal cases in the March 2026 ADR review.' },
+      { level:'low', title:'No Billionaires', text:'No DMK Rajya Sabha MP crossed the Rs.100 crore threshold.' },
+    ]
+  },
+
+  sp_core: {
+    id: 'sp_core',
+    name: 'Samajwadi Party Network',
+    type: 'root',
+    desc: 'Samajwadi Party leadership, rebranding, campaign strategy, and the core parliamentary wealth profile.',
+    founded: 1992,
+    hq: 'Lucknow',
+    subsidiaries: 5,
+    govtLinks: 0,
+    globalExposure: 2,
+    marketCap: 'N/A',
+    riskLevel: 'MEDIUM',
+    nodes: [
+      { id:'sp', label:'Samajwadi Party', type:'root', size:28, desc:'Principal opposition party in Uttar Pradesh.' },
+      { id:'akhilesh', label:'Akhilesh Yadav', type:'person', size:20, desc:'Party president and chief strategist.' },
+      { id:'mulayam', label:'Mulayam Singh Yadav', type:'person', size:16, desc:'Party founder.' },
+      { id:'jaya', label:'Jaya Bachchan', type:'person', size:18, desc:'Richest SP-linked Rajya Sabha MP.' },
+      { id:'ipac', label:'I-PAC', type:'global', size:15, desc:'Campaign consultancy firm hired for 2027 UP elections.' },
+      { id:'vision', label:'Vision India', type:'flag', size:14, desc:'Rebranding initiative across cities.' },
+      { id:'opp', label:'UP Opposition', type:'flag', size:13, desc:'SP is the principal opposition in Uttar Pradesh.' },
+      { id:'vote', label:'2022 UP Result', type:'global', size:13, desc:'111 seats and 32% vote share in 2022.' },
+      { id:'fcrabill', label:'FCRA Bill Critique', type:'flag', size:12, desc:'Akhilesh called the proposed bill rigged.' },
+    ],
+    links: [
+      { source:'sp', target:'akhilesh', type:'control' },
+      { source:'sp', target:'mulayam', type:'control' },
+      { source:'sp', target:'jaya', type:'investment' },
+      { source:'sp', target:'ipac', type:'partner' },
+      { source:'sp', target:'vision', type:'control' },
+      { source:'sp', target:'opp', type:'control' },
+      { source:'sp', target:'vote', type:'global' },
+      { source:'akhilesh', target:'fcrabill', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'Election Strategy', text:'SP has brought in I-PAC to manage the 2027 Uttar Pradesh campaign.' },
+      { level:'medium', title:'Rebranding', text:'Vision India summits are being used to broaden the party image beyond traditional vote bases.' },
+      { level:'medium', title:'Parliamentary Wealth', text:'Jaya Bachchan remains the standout wealthy SP-linked Rajya Sabha MP.' },
+    ]
+  },
+
+  sp_rajya: {
+    id: 'sp_rajya',
+    name: 'SP Rajya Sabha Profile',
+    type: 'person',
+    desc: 'Assets and criminal case profile for Samajwadi Party Rajya Sabha MPs.',
+    founded: 2026,
+    hq: 'Rajya Sabha',
+    subsidiaries: 4,
+    govtLinks: 0,
+    globalExposure: 1,
+    marketCap: 'N/A',
+    riskLevel: 'HIGH',
+    nodes: [
+      { id:'avg', label:'Average Assets', type:'root', size:22, desc:'Average SP MP assets: Rs.399.71 crore.' },
+      { id:'mps', label:'4 MPs Analysed', type:'global', size:15, desc:'Number of SP Rajya Sabha MPs in the ADR review.' },
+      { id:'cases', label:'2 of 4 MPs', type:'flag', size:15, desc:'SP MPs with declared criminal cases.' },
+      { id:'jaya2', label:'Jaya Bachchan', type:'person', size:18, desc:'Declared assets worth Rs.1,578+ crore.' },
+      { id:'rank', label:'4th Richest MP', type:'global', size:13, desc:'Jaya ranks 4th among 229 MPs overall.' },
+      { id:'comp', label:'Party Comparison', type:'global', size:12, desc:'SP average assets exceed most other major parties.' },
+    ],
+    links: [
+      { source:'avg', target:'mps', type:'investment' },
+      { source:'avg', target:'cases', type:'controversy' },
+      { source:'avg', target:'jaya2', type:'investment' },
+      { source:'jaya2', target:'rank', type:'global' },
+      { source:'cases', target:'comp', type:'global' },
+    ],
+    alerts: [
+      { level:'high', title:'Asset Average', text:'SP MPs averaged Rs.399.71 crore, one of the highest among major parties.' },
+      { level:'medium', title:'Criminal Cases', text:'2 of 4 SP Rajya Sabha MPs declared criminal cases.' },
+      { level:'low', title:'Jaya Bachchan', text:'Jaya Bachchan remains the richest SP-linked parliamentarian in the dataset.' },
+    ]
+  },
+
+  rjd_core: {
+    id: 'rjd_core',
+    name: 'RJD Legal & Leadership Network',
+    type: 'root',
+    desc: 'RJD leadership, land-for-job controversy, and the party’s Rajya Sabha criminal case profile.',
+    founded: 1997,
+    hq: 'Patna',
+    subsidiaries: 5,
+    govtLinks: 1,
+    globalExposure: 2,
+    marketCap: 'N/A',
+    riskLevel: 'HIGH',
+    nodes: [
+      { id:'rjd', label:'Rashtriya Janata Dal', type:'root', size:28, desc:'Party founded by Lalu Prasad Yadav in 1997.' },
+      { id:'lalu', label:'Lalu Prasad Yadav', type:'person', size:20, desc:'Party president; former Railway Minister.' },
+      { id:'tejashwi', label:'Tejashwi Prasad Yadav', type:'person', size:18, desc:'Leader of Opposition in Bihar.' },
+      { id:'rabri', label:'Rabri Devi', type:'person', size:16, desc:'Former Bihar Chief Minister.' },
+      { id:'misa', label:'Misa Bharti', type:'person', size:15, desc:'RJD MP from Patliputra.' },
+      { id:'sudhakar', label:'Sudhakar Singh', type:'person', size:14, desc:'RJD MP tied to a March 2026 controversy.' },
+      { id:'landjob', label:'Land-for-Job Scam', type:'flag', size:18, desc:'January-February 2026 charges and trial updates.' },
+      { id:'ed', label:'ED Probe', type:'flag', size:15, desc:'Money laundering probe linked to the land transfers.' },
+      { id:'support', label:'Yadav-Muslim Base', type:'global', size:13, desc:'Core support base in Bihar politics.' },
+    ],
+    links: [
+      { source:'rjd', target:'lalu', type:'control' },
+      { source:'rjd', target:'tejashwi', type:'control' },
+      { source:'rjd', target:'rabri', type:'control' },
+      { source:'rjd', target:'misa', type:'control' },
+      { source:'rjd', target:'sudhakar', type:'control' },
+      { source:'rjd', target:'landjob', type:'controversy' },
+      { source:'landjob', target:'ed', type:'controversy' },
+      { source:'rjd', target:'support', type:'global' },
+    ],
+    alerts: [
+      { level:'high', title:'Land-for-Job Case', text:'Charges were framed in the land-for-job scam in early 2026.' },
+      { level:'medium', title:'Family Case Web', text:'Lalu, Rabri, Tejashwi, Tej Pratap, and Misa Bharti are named in the case narrative.' },
+      { level:'medium', title:'ED Probe', text:'The Enforcement Directorate is probing the money laundering trail.' },
+    ]
+  },
+
+  rjd_legal: {
+    id: 'rjd_legal',
+    name: 'RJD Legal & MP Cases',
+    type: 'flag',
+    desc: 'RJD Rajya Sabha criminal cases and the latest party controversy snapshot.',
+    founded: 2026,
+    hq: 'Bihar',
+    subsidiaries: 4,
+    govtLinks: 1,
+    globalExposure: 0,
+    marketCap: 'N/A',
+    riskLevel: 'HIGH',
+    nodes: [
+      { id:'rs3', label:'3 MPs Analysed', type:'root', size:22, desc:'RJD Rajya Sabha MPs analysed by ADR.' },
+      { id:'cases2', label:'2 of 3 MPs', type:'flag', size:16, desc:'RJD MPs with declared criminal cases.' },
+      { id:'avg', label:'Avg Assets N/S', type:'global', size:13, desc:'Average assets not separately specified for RJD.' },
+      { id:'sudhakar2', label:'Sudhakar Singh', type:'person', size:15, desc:'Recent controversy around Odisha guest house allegations.' },
+      { id:'land', label:'Land Usurpation Claims', type:'flag', size:14, desc:'JD(U) allegations over donated land and mansion sites.' },
+      { id:'protest', label:'Party Response', type:'global', size:12, desc:'RJD and allies pushed back on the allegations.' },
+    ],
+    links: [
+      { source:'rs3', target:'cases2', type:'controversy' },
+      { source:'rs3', target:'avg', type:'global' },
+      { source:'sudhakar2', target:'land', type:'controversy' },
+      { source:'land', target:'protest', type:'controversy' },
+      { source:'cases2', target:'protest', type:'global' },
+    ],
+    alerts: [
+      { level:'high', title:'Criminal Cases', text:'2 of 3 RJD Rajya Sabha MPs declared criminal cases.' },
+      { level:'medium', title:'Land Allegations', text:'The party remains entangled in land usurpation claims in Bihar.' },
+      { level:'low', title:'Recent Controversy', text:'Sudhakar Singh’s March 2026 allegations added to the noise around the party.' },
+    ]
+  },
+
+  bjd_core: {
+    id: 'bjd_core',
+    name: 'Biju Janata Dal Network',
+    type: 'root',
+    desc: 'BJD party structure, Naveen Patnaik leadership, and the key opposition and foundation nodes from the latest reports.',
+    founded: 1997,
+    hq: 'Odisha',
+    subsidiaries: 4,
+    govtLinks: 0,
+    globalExposure: 2,
+    marketCap: 'N/A',
+    riskLevel: 'MEDIUM',
+    nodes: [
+      { id:'bjd', label:'Biju Janata Dal', type:'root', size:28, desc:'Principal opposition in Odisha after 2024.' },
+      { id:'naveen', label:'Naveen Patnaik', type:'person', size:20, desc:'Party president and Leader of Opposition.' },
+      { id:'biju', label:'Biju Patnaik Legacy', type:'global', size:16, desc:'Secular, regional-pride founding legacy.' },
+      { id:'opp', label:'Principal Opposition', type:'flag', size:14, desc:'Current status in Odisha politics.' },
+      { id:'scb', label:'SCB Protest', type:'flag', size:14, desc:'Agitation over SCB Medical College fire tragedy.' },
+      { id:'remarks', label:'Biju Remarks Protest', type:'flag', size:13, desc:'BJD protests over remarks about Biju Patnaik.' },
+      { id:'foundation', label:'Biju-Naveen Foundation', type:'sub', size:15, desc:'Foundation at the center of the Santrupt Misra controversy.' },
+      { id:'mlas', label:'6 MLAs Show-Cause', type:'flag', size:13, desc:'MLAs issued show-cause notices for Rajya Sabha vote rebellion.' },
+    ],
+    links: [
+      { source:'bjd', target:'naveen', type:'control' },
+      { source:'bjd', target:'biju', type:'global' },
+      { source:'bjd', target:'opp', type:'control' },
+      { source:'bjd', target:'scb', type:'controversy' },
+      { source:'bjd', target:'remarks', type:'controversy' },
+      { source:'bjd', target:'foundation', type:'control' },
+      { source:'bjd', target:'mlas', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'Opposition Role', text:'BJD is now the principal opposition in Odisha after losing power in 2024.' },
+      { level:'medium', title:'Leadership', text:'Naveen Patnaik remains the central face of the party and the opposition.' },
+      { level:'medium', title:'Internal Friction', text:'The foundation controversy and MLA rebellion show visible party tension.' },
+    ]
+  },
+
+  bjd_funding: {
+    id: 'bjd_funding',
+    name: 'BJD Funding Network',
+    type: 'person',
+    desc: 'FY 2024-25 contributions, trust-linked donations, and the main corporate donor channels for BJD.',
+    founded: 2024,
+    hq: 'Odisha',
+    subsidiaries: 4,
+    govtLinks: 0,
+    globalExposure: 1,
+    marketCap: 'N/A',
+    riskLevel: 'MEDIUM',
+    nodes: [
+      { id:'total', label:'Rs.60 crore', type:'root', size:26, desc:'Total FY 2024-25 donations above Rs.20,000.' },
+      { id:'vedanta', label:'Vedanta Limited', type:'sub', size:18, desc:'Largest single corporate donor at Rs.25 crore.' },
+      { id:'trusts', label:'Electoral Trusts', type:'global', size:16, desc:'Rs.35 crore through trust donations.' },
+      { id:'april', label:'Apr-May 2024 Spike', type:'flag', size:14, desc:'Entire sum received during election months.' },
+      { id:'stable', label:'Stable Outfit', type:'global', size:13, desc:'Treasurer described the party as a stable outfit.' },
+      { id:'direct', label:'Direct Corporate Donations', type:'sub', size:13, desc:'Part of the Rs.60 crore came directly from corporates.' },
+      { id:'bondlegacy', label:'₹775 Crore Bonds', type:'flag', size:13, desc:'Historical electoral bond flow in 2022-24.' },
+      { id:'nil', label:'Nil Contributions', type:'flag', size:12, desc:'Previous two years showed nil income above Rs.20,000.' },
+    ],
+    links: [
+      { source:'total', target:'vedanta', type:'investment' },
+      { source:'total', target:'trusts', type:'investment' },
+      { source:'total', target:'april', type:'controversy' },
+      { source:'total', target:'stable', type:'global' },
+      { source:'total', target:'direct', type:'investment' },
+      { source:'total', target:'bondlegacy', type:'global' },
+      { source:'total', target:'nil', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'FY25 Contributions', text:'BJD received Rs.60 crore in donations above Rs.20,000 in FY 2024-25.' },
+      { level:'medium', title:'Donor Mix', text:'Vedanta contributed Rs.25 crore and electoral trusts Rs.35 crore.' },
+      { level:'low', title:'Timing', text:'The full amount came during April-May 2024 around the elections.' },
+    ]
+  },
+
+  bjd_legal: {
+    id: 'bjd_legal',
+    name: 'BJD Legal & Controversy',
+    type: 'flag',
+    desc: 'Santrupt Misra affidavit dispute, MLAs voting rebellion, and protest controversies around BJD in 2026.',
+    founded: 2026,
+    hq: 'Bhubaneswar',
+    subsidiaries: 4,
+    govtLinks: 1,
+    globalExposure: 0,
+    marketCap: 'N/A',
+    riskLevel: 'HIGH',
+    nodes: [
+      { id:'misra', label:'Santrupt Misra', type:'root', size:22, desc:'Rajya Sabha nominee at the center of affidavit allegations.' },
+      { id:'vkp', label:'V. K. Pandian', type:'person', size:16, desc:'President of the Biju-Naveen Inspirational Foundation.' },
+      { id:'prabhat', label:'Prabhat Biswal', type:'person', size:15, desc:'Senior leader who raised concerns over the foundation.' },
+      { id:'mlas2', label:'6 MLAs', type:'flag', size:16, desc:'Show-cause notices over Rajya Sabha voting rebellion.' },
+      { id:'ray', label:'Dilip Ray', type:'global', size:14, desc:'Independent candidate backed by BJP in the rebellion vote.' },
+      { id:'scb2', label:'SCB Fire Tragedy', type:'flag', size:14, desc:'13 lives lost; BJD demanded accountability.' },
+      { id:'dubey', label:'Nishikant Dubey Remarks', type:'govt', size:13, desc:'BJD protested remarks on Biju Patnaik.' },
+      { id:'transparency', label:'Transparency Concerns', type:'flag', size:13, desc:'Questions over foundation assets and affidavit disclosure.' },
+    ],
+    links: [
+      { source:'misra', target:'vkp', type:'controversy' },
+      { source:'misra', target:'prabhat', type:'controversy' },
+      { source:'misra', target:'transparency', type:'controversy' },
+      { source:'misra', target:'mlas2', type:'controversy' },
+      { source:'mlas2', target:'ray', type:'global' },
+      { source:'scb2', target:'transparency', type:'controversy' },
+      { source:'dubey', target:'scb2', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'Affidavit Issue', text:'Santrupt Misra was accused of concealing his link to the Biju-Naveen Inspirational Foundation.' },
+      { level:'medium', title:'Voting Rebellion', text:'Six BJD MLAs received show-cause notices over Rajya Sabha voting.' },
+      { level:'medium', title:'Protest Cycle', text:'SCB tragedy and Biju Patnaik remarks drove major opposition protests.' },
+    ]
+  },
+
+  cpi_core: {
+    id: 'cpi_core',
+    name: 'Communist Party of India Network',
+    type: 'root',
+    desc: 'Communist Party of India leadership, parliamentary presence, and state party footprint after the 2023 national-party status change.',
+    founded: 1925,
+    hq: 'New Delhi',
+    subsidiaries: 3,
+    govtLinks: 1,
+    globalExposure: 0,
+    marketCap: 'N/A',
+    riskLevel: 'LOW',
+    nodes: [
+      { id:'cpi', label:'Communist Party of India', type:'root', size:28, desc:'CPI national network and party structure.' },
+      { id:'draja', label:'D. Raja', type:'person', size:20, desc:'General Secretary of CPI.' },
+      { id:'ksubbarayan', label:'K. Subbarayan', type:'person', size:16, desc:'Lok Sabha leader.' },
+      { id:'psanthosh', label:'P. Santhosh Kumar', type:'person', size:16, desc:'Rajya Sabha leader.' },
+      { id:'kerala', label:'Kerala', type:'govt', size:14, desc:'State where CPI is part of the ruling Left Democratic Front.' },
+      { id:'tamilnadu', label:'Tamil Nadu', type:'global', size:13, desc:'State where CPI is part of the Secular Progressive Alliance.' },
+      { id:'status', label:'State Party Status', type:'flag', size:13, desc:'ECI recognition as state party in key states after 2023.' },
+    ],
+    links: [
+      { source:'cpi', target:'draja', type:'control' },
+      { source:'cpi', target:'ksubbarayan', type:'control' },
+      { source:'cpi', target:'psanthosh', type:'control' },
+      { source:'cpi', target:'kerala', type:'govtlink' },
+      { source:'cpi', target:'tamilnadu', type:'global' },
+      { source:'cpi', target:'status', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'Party Status', text:'CPI lost national party status in 2023, but remains active as a state party in several states.' },
+      { level:'medium', title:'Parliament', text:'D. Raja, K. Subbarayan, and P. Santhosh Kumar anchor the current parliamentary profile.' },
+      { level:'low', title:'State Alliances', text:'The party remains embedded in coalition politics in Kerala and Tamil Nadu.' },
+    ]
+  },
+
+  aimim_core: {
+    id: 'aimim_core',
+    name: 'AIMIM Network',
+    type: 'root',
+    desc: 'All India Majlis-e-Ittehadul Muslimeen focused on Hyderabad, minority-concentrated seats, and its West Bengal outreach.',
+    founded: 1958,
+    hq: 'Hyderabad',
+    subsidiaries: 2,
+    govtLinks: 1,
+    globalExposure: 1,
+    marketCap: 'N/A',
+    riskLevel: 'MEDIUM',
+    nodes: [
+      { id:'aimim', label:'AIMIM', type:'root', size:28, desc:'All India Majlis-e-Ittehadul Muslimeen.' },
+      { id:'owaisi', label:'Asaduddin Owaisi', type:'person', size:20, desc:'Party president and Hyderabad MP.' },
+      { id:'aaup', label:'AAUP Alliance', type:'sub', size:16, desc:'Election tie-up with Humayun Kabir\'s Aam Janata Unnayan Party.' },
+      { id:'wb26', label:'West Bengal 2026', type:'global', size:15, desc:'Current election focus in West Bengal.' },
+      { id:'allegation', label:'BJP Funding Allegation', type:'flag', size:15, desc:'TMC alleged that BJP funding was routed to AIMIM to split minority votes.' },
+      { id:'shaukat', label:'Shaukat Ali FIR', type:'govt', size:14, desc:'UP AIMIM president booked for provocative statements.' },
+      { id:'minority', label:'Minority Vote Split', type:'flag', size:13, desc:'Accusation around dividing minority constituencies.' },
+    ],
+    links: [
+      { source:'aimim', target:'owaisi', type:'control' },
+      { source:'aimim', target:'aaup', type:'partner' },
+      { source:'aimim', target:'wb26', type:'global' },
+      { source:'owaisi', target:'allegation', type:'controversy' },
+      { source:'owaisi', target:'minority', type:'controversy' },
+      { source:'shaukat', target:'aimim', type:'govtlink' },
+      { source:'shaukat', target:'allegation', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'WB Focus', text:'AIMIM is contesting West Bengal seats in alliance with Humayun Kabir\'s AAUP.' },
+      { level:'medium', title:'Funding Row', text:'TMC leaders alleged BJP funding, which Asaduddin Owaisi publicly denied.' },
+      { level:'medium', title:'UP FIR', text:'AIMIM\'s Uttar Pradesh president Shaukat Ali was booked for provocative statements.' },
+    ]
+  },
+
+  aimim_legal: {
+    id: 'aimim_legal',
+    name: 'AIMIM Legal & Controversy',
+    type: 'flag',
+    desc: 'Funding allegations, public denials, and local FIR action around AIMIM in 2026.',
+    founded: 2026,
+    hq: 'Kolkata / Hyderabad',
+    subsidiaries: 2,
+    govtLinks: 1,
+    globalExposure: 0,
+    marketCap: 'N/A',
+    riskLevel: 'HIGH',
+    nodes: [
+      { id:'owaisi2', label:'Asaduddin Owaisi', type:'root', size:22, desc:'Denied allegations that BJP was funding AIMIM.' },
+      { id:'funding2', label:'BJP Funding Claim', type:'flag', size:17, desc:'TMC allegation that AIMIM received BJP-linked money.' },
+      { id:'denial', label:'Public Denial', type:'global', size:14, desc:'Owaisi rejected the funding claim at a Kolkata press conference.' },
+      { id:'shaukat2', label:'Shaukat Ali FIR', type:'govt', size:15, desc:'UP FIR over alleged provocative comments.' },
+      { id:'minority2', label:'Minority Constituencies', type:'flag', size:13, desc:'Accusation centered on vote splitting in minority-heavy seats.' },
+      { id:'wbfocus', label:'West Bengal Contest', type:'global', size:12, desc:'AIMIM\'s 2026 West Bengal election plan with AAUP.' },
+    ],
+    links: [
+      { source:'owaisi2', target:'funding2', type:'controversy' },
+      { source:'owaisi2', target:'denial', type:'global' },
+      { source:'owaisi2', target:'minority2', type:'controversy' },
+      { source:'shaukat2', target:'funding2', type:'controversy' },
+      { source:'shaukat2', target:'wbfocus', type:'govtlink' },
+      { source:'funding2', target:'minority2', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'Funding Claim', text:'The central dispute is the TMC allegation that AIMIM received BJP-linked funding.' },
+      { level:'medium', title:'Denial', text:'Asaduddin Owaisi rejected the claim and challenged the logic behind it.' },
+      { level:'medium', title:'FIR Track', text:'Shaukat Ali\'s FIR remains the other active legal thread in the dataset.' },
+    ]
+  },
+
+  nc_core: {
+    id: 'nc_core',
+    name: 'Jammu & Kashmir National Conference',
+    type: 'root',
+    desc: 'J&K National Conference leadership, governing status, and constituency development context.',
+    founded: 1932,
+    hq: 'Srinagar',
+    subsidiaries: 3,
+    govtLinks: 2,
+    globalExposure: 0,
+    marketCap: 'N/A',
+    riskLevel: 'LOW',
+    nodes: [
+      { id:'nc', label:'National Conference', type:'root', size:28, desc:'Jammu & Kashmir National Conference.' },
+      { id:'farooq', label:'Dr. Farooq Abdullah', type:'person', size:19, desc:'Current president.' },
+      { id:'omar', label:'Omar Abdullah', type:'person', size:20, desc:'Vice president and J&K Chief Minister.' },
+      { id:'sadhotra', label:'Ajay Kumar Sadhotra', type:'person', size:15, desc:'Jammu North candidate with asset disclosure.' },
+      { id:'cdf', label:'CDF Allocation', type:'flag', size:16, desc:'Constituency Development Fund allocation of Rs.427.50 crore.' },
+      { id:'opposition', label:'Ruling Party', type:'flag', size:13, desc:'NC is in government after the 2024 assembly elections.' },
+      { id:'mplads', label:'MPLADS Critique', type:'global', size:13, desc:'Criticism of BJP MP Ghulam Ali Khatana spending funds outside J&K.' },
+    ],
+    links: [
+      { source:'nc', target:'farooq', type:'control' },
+      { source:'nc', target:'omar', type:'control' },
+      { source:'nc', target:'sadhotra', type:'partner' },
+      { source:'nc', target:'cdf', type:'govtlink' },
+      { source:'nc', target:'opposition', type:'control' },
+      { source:'omar', target:'cdf', type:'govtlink' },
+      { source:'omar', target:'mplads', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'Government Status', text:'NC is the ruling party in Jammu & Kashmir UT after the 2024 assembly elections.' },
+      { level:'medium', title:'CDF Funds', text:'Omar Abdullah reported non-lapsable CDF savings of Rs.25.43 crore.' },
+      { level:'medium', title:'MPLADS Critique', text:'Tanvir Sadiq attacked BJP MP Ghulam Ali Khatana for spending funds in Uttar Pradesh.' },
+    ]
+  },
+
+  nc_governance: {
+    id: 'nc_governance',
+    name: 'NC Governance & Funds',
+    type: 'govt',
+    desc: 'CDF allocations, tender savings, and development-fund disputes in Jammu & Kashmir.',
+    founded: 2026,
+    hq: 'Jammu & Kashmir',
+    subsidiaries: 3,
+    govtLinks: 3,
+    globalExposure: 0,
+    marketCap: 'N/A',
+    riskLevel: 'LOW',
+    nodes: [
+      { id:'allocation', label:'Rs.427.50 crore', type:'root', size:24, desc:'CDF allocation for 2025-26.' },
+      { id:'savings', label:'Rs.25.43 crore Savings', type:'global', size:17, desc:'Tender savings recorded under CDF.' },
+      { id:'works', label:'3,684 Works', type:'sub', size:15, desc:'Works completed across districts.' },
+      { id:'srinagar', label:'Srinagar', type:'person', size:14, desc:'Highest savings under the scheme.' },
+      { id:'poonch', label:'Poonch', type:'person', size:13, desc:'Among the top districts for savings.' },
+      { id:'samba', label:'Samba', type:'person', size:13, desc:'Among the top districts for savings.' },
+      { id:'funds', label:'MPLADS Funds', type:'flag', size:14, desc:'Debate over spending outside J&K.' },
+    ],
+    links: [
+      { source:'allocation', target:'savings', type:'govtlink' },
+      { source:'allocation', target:'works', type:'investment' },
+      { source:'savings', target:'srinagar', type:'global' },
+      { source:'savings', target:'poonch', type:'global' },
+      { source:'savings', target:'samba', type:'global' },
+      { source:'funds', target:'allocation', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'CDF Scheme', text:'J&K CDF funds are non-lapsable and produced Rs.25.43 crore in savings.' },
+      { level:'medium', title:'District Spread', text:'Srinagar, Poonch, and Samba were highlighted in the savings breakdown.' },
+      { level:'medium', title:'Political Debate', text:'NC used MPLADS spending to critique BJP representation in J&K.' },
+    ]
+  },
+
+  pdp_core: {
+    id: 'pdp_core',
+    name: 'Jammu & Kashmir Peoples Democratic Party',
+    type: 'root',
+    desc: 'PDP leadership and its opposition role in Jammu & Kashmir, with candidate affidavit data and recent assembly debates.',
+    founded: 1999,
+    hq: 'Srinagar',
+    subsidiaries: 2,
+    govtLinks: 1,
+    globalExposure: 0,
+    marketCap: 'N/A',
+    riskLevel: 'LOW',
+    nodes: [
+      { id:'pdp', label:'PDP', type:'root', size:28, desc:'Jammu & Kashmir Peoples Democratic Party.' },
+      { id:'mehbooba', label:'Mehbooba Mufti', type:'person', size:20, desc:'Party president.' },
+      { id:'darshan', label:'Darshan Kumar Magotra', type:'person', size:15, desc:'Jammu North candidate with declared assets.' },
+      { id:'aditya', label:'Aditya Gupta', type:'person', size:14, desc:'PDP youth president who criticized BJP MP fund diversion.' },
+      { id:'opposition', label:'Opposition Party', type:'flag', size:14, desc:'PDP remains in opposition in the J&K assembly.' },
+      { id:'resolution', label:'Assembly Resolution', type:'govt', size:13, desc:'PDP received one resolution slot in the recent session.' },
+      { id:'funds', label:'MPLADS Funds', type:'global', size:13, desc:'Debate over funds spent in Uttar Pradesh instead of J&K.' },
+    ],
+    links: [
+      { source:'pdp', target:'mehbooba', type:'control' },
+      { source:'pdp', target:'darshan', type:'partner' },
+      { source:'pdp', target:'aditya', type:'partner' },
+      { source:'pdp', target:'opposition', type:'control' },
+      { source:'pdp', target:'resolution', type:'govtlink' },
+      { source:'aditya', target:'funds', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'Opposition Role', text:'PDP continues as an opposition party in the Jammu & Kashmir assembly.' },
+      { level:'medium', title:'Assembly Slot', text:'PDP received one resolution slot in the latest session.' },
+      { level:'medium', title:'Fund Critique', text:'PDP joined NC in criticizing BJP MP Ghulam Ali Khatana over MPLADS spending.' },
+    ]
+  },
+
+  shiv_sena_core: {
+    id: 'shiv_sena_core',
+    name: 'Shiv Sena Network',
+    type: 'root',
+    desc: 'Shiv Sena symbol and a compact network view for the bow-and-arrow badge.',
+    founded: 1966,
+    hq: 'Maharashtra',
+    subsidiaries: 3,
+    govtLinks: 0,
+    globalExposure: 1,
+    marketCap: 'N/A',
+    riskLevel: 'MEDIUM',
+    nodes: [
+      { id:'ss', label:'Shiv Sena', type:'root', size:28, desc:'Shiv Sena party root node.' },
+      { id:'symbol', label:'Bow and Arrow', type:'global', size:18, desc:'The election symbol used by Shiv Sena.' },
+      { id:'maharashtra', label:'Maharashtra Base', type:'flag', size:16, desc:'Regional base in Maharashtra.' },
+      { id:'legacy', label:'Party Legacy', type:'sub', size:14, desc:'Founded by Bal Thackeray.' },
+    ],
+    links: [
+      { source:'ss', target:'symbol', type:'global' },
+      { source:'ss', target:'maharashtra', type:'control' },
+      { source:'ss', target:'legacy', type:'control' },
+    ],
+    alerts: [
+      { level:'medium', title:'Party Symbol', text:'Shiv Sena uses the bow and arrow as its election symbol.' },
+      { level:'low', title:'Regional Base', text:'The party remains rooted in Maharashtra politics.' },
+    ]
+  },
+
+  sad_core: {
+    id: 'sad_core',
+    name: 'Shiromani Akali Dal',
+    type: 'root',
+    desc: 'Shiromani Akali Dal leadership, Punjab opposition status, and the 2027 election context.',
+    founded: 1920,
+    hq: 'Amritsar / Chandigarh',
+    subsidiaries: 3,
+    govtLinks: 1,
+    globalExposure: 0,
+    marketCap: 'N/A',
+    riskLevel: 'MEDIUM',
+    nodes: [
+      { id:'sad', label:'Shiromani Akali Dal', type:'root', size:28, desc:'Punjab-based regional party.' },
+      { id:'sukhbir', label:'Sukhbir Singh Badal', type:'person', size:20, desc:'Party president.' },
+      { id:'majithia', label:'Bikram Singh Majithia', type:'person', size:18, desc:'Leader in the disproportionate assets case.' },
+      { id:'opp', label:'Opposition in Punjab', type:'flag', size:14, desc:'SAD is in opposition and preparing for the 2027 election.' },
+      { id:'split', label:'BJP Split', type:'global', size:13, desc:'Parted ways with BJP in 2020 over farm laws.' },
+      { id:'funds', label:'Poll Promise Pressure', type:'govt', size:13, desc:'SAD demanded funding for promises ahead of 2027.' },
+      { id:'jail', label:'7-Month Jail Time', type:'flag', size:13, desc:'Majithia spent about seven months in custody before bail.' },
+    ],
+    links: [
+      { source:'sad', target:'sukhbir', type:'control' },
+      { source:'sad', target:'majithia', type:'controversy' },
+      { source:'sad', target:'opp', type:'control' },
+      { source:'sad', target:'split', type:'global' },
+      { source:'sad', target:'funds', type:'govtlink' },
+      { source:'majithia', target:'jail', type:'controversy' },
+    ],
+    alerts: [
+      { level:'high', title:'Punjab Opposition', text:'SAD remains in opposition in Punjab and is building toward the 2027 assembly election.' },
+      { level:'medium', title:'BJP Split', text:'The party split from BJP in 2020 over the farm laws issue.' },
+      { level:'medium', title:'Majithia Bail', text:'Majithia received bail in February 2026 after spending roughly seven months in jail.' },
+    ]
+  },
+
+  sad_legal: {
+    id: 'sad_legal',
+    name: 'SAD Legal & Controversy',
+    type: 'flag',
+    desc: 'Majithia disproportionate-assets allegations, bail, and the party\'s budget pressure campaign.',
+    founded: 2026,
+    hq: 'Punjab',
+    subsidiaries: 3,
+    govtLinks: 2,
+    globalExposure: 0,
+    marketCap: 'N/A',
+    riskLevel: 'HIGH',
+    nodes: [
+      { id:'majithia2', label:'Bikram Singh Majithia', type:'root', size:22, desc:'Central figure in the DA case.' },
+      { id:'da', label:'Disproportionate Assets', type:'flag', size:18, desc:'Punjab Vigilance Bureau case against Majithia.' },
+      { id:'illegal', label:'Rs.700 crore Assets', type:'global', size:16, desc:'Alleged illegal assets discovered in the probe.' },
+      { id:'drugmoney', label:'Rs.540 crore Drug Money', type:'flag', size:16, desc:'Alleged laundering trail tied to drug money.' },
+      { id:'bail', label:'Supreme Court Bail', type:'govt', size:15, desc:'Bail granted on February 2, 2026.' },
+      { id:'aman', label:'Aman Arora Response', type:'person', size:13, desc:'Said the bail was only technical and procedural.' },
+      { id:'budget', label:'Rs.1.57 lakh crore Demand', type:'flag', size:14, desc:'SAD budget demand across welfare promises.' },
+    ],
+    links: [
+      { source:'majithia2', target:'da', type:'controversy' },
+      { source:'da', target:'illegal', type:'controversy' },
+      { source:'da', target:'drugmoney', type:'controversy' },
+      { source:'majithia2', target:'bail', type:'govtlink' },
+      { source:'aman', target:'bail', type:'controversy' },
+      { source:'budget', target:'sad', type:'govtlink' },
+    ],
+    alerts: [
+      { level:'high', title:'DA Case', text:'Majithia faced a disproportionate-assets case and was granted bail in February 2026.' },
+      { level:'medium', title:'Asset Allegation', text:'The case mentions Rs.700 crore in alleged illegal assets and Rs.540 crore in drug-money laundering.' },
+      { level:'medium', title:'Budget Pressure', text:'SAD pushed the Punjab government to fund its 2027 poll promises.' },
+    ]
+  }
 };
-const palette = {
-  core: "var(--accent)",
-  leader: "var(--blue)",
-  company: "var(--amber)",
-  asset: "var(--accent2)",
-  other: "var(--purple)",
+// â”€â”€â”€ COLOR MAP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const TYPE_COLOR = {
+  root:   '#4b5d16',
+  person: '#223300',
+  sub:    '#f2b635',
+  govt:   '#e45c10',
+  global: '#b78a2a',
+  flag:   '#e45c10',
+  family: '#4b5d16'
 };
-const quickTargets = [
-  "Indian National Congress",
-  "Young Indian Pvt Ltd",
-  "Rahul Gandhi",
-  "Sonia Gandhi",
-  "Mallikarjun Kharge",
-  "Priyanka Gandhi Vadra",
-  "Abhishek Manu Singhvi",
-  "T. Subbarami Reddy",
-  "Sandur Power Company Ltd",
-];
-
-const nodes = new Map();
-const links = [];
-const nodeEls = new Map();
-const linkEls = new Map();
-const state = {
-  selectedId: null,
-  search: "",
-  zoom: 0.95,
-  labelsVisible: true,
-  draggingId: null,
-  hoverId: null,
-  tx: 0,
-  ty: 0,
+const LINK_COLOR = {
+  owns:        '#4b5d16',
+  control:     '#f2b635',
+  subsidiary:  '#b78a2a',
+  govtlink:    '#e45c10',
+  investment:  '#223300',
+  partner:     '#4b5d16',
+  jv:          '#b78a2a',
+  global:      '#4b5d16',
+  controversy: '#e45c10',
+  investigating:'#e45c10'
 };
 
-function slugify(value) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+// â”€â”€â”€ STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+let currentEntity = null;
+let simulation = null;
+let svgEl = null;
+let zoomBeh = null;
+let showLabels = true;
+let activeFilters = new Set(['sub','govt','global','person','flag']);
+const PARTY_SYMBOL_DIR = 'party-symbols';
+const partySymbol = (file) => `${PARTY_SYMBOL_DIR}/${file}.svg`;
+
+const PARTY_SYMBOLS = {
+  congress_core: {
+    name: 'Raised Hand',
+    glyph: '✋',
+    image: partySymbol('congress'),
+    note: 'Indian National Congress symbol'
+  },
+  money_trail: {
+    name: 'Raised Hand',
+    glyph: '✋',
+    image: partySymbol('congress'),
+    note: 'Congress-linked wealth network'
+  },
+  infra_links: {
+    name: 'Raised Hand',
+    glyph: '✋',
+    image: partySymbol('congress'),
+    note: 'Congress-linked infrastructure network'
+  },
+  jagan_links: {
+    name: 'Raised Hand',
+    glyph: '✋',
+    image: partySymbol('congress'),
+    note: 'Congress-era business tie'
+  },
+  tmc_core: {
+    name: 'Jora Ghas Phul',
+    glyph: '🌱',
+    image: partySymbol('tmc'),
+    note: 'Trinamool Congress symbol'
+  },
+  tmc_wealth: {
+    name: 'Jora Ghas Phul',
+    glyph: '🌱',
+    image: partySymbol('tmc'),
+    note: 'TMC-linked wealth network'
+  },
+  tmc_legal: {
+    name: 'Jora Ghas Phul',
+    glyph: '🌱',
+    image: partySymbol('tmc'),
+    note: 'TMC faction symbol'
+  },
+  aap_core: {
+    name: 'Broom',
+    glyph: '🧹',
+    image: partySymbol('aap'),
+    note: 'Aam Aadmi Party symbol'
+  },
+  aap_funding: {
+    name: 'Broom',
+    glyph: '🧹',
+    image: partySymbol('aap'),
+    note: 'AAP-linked funding network'
+  },
+  aap_rajya: {
+    name: 'Broom',
+    glyph: '🧹',
+    image: partySymbol('aap'),
+    note: 'AAP parliamentary profile'
+  },
+  cpi_core: {
+    name: 'Sickle and Ears',
+    glyph: '⚒',
+    image: partySymbol('cpi'),
+    note: 'Communist Party of India symbol'
+  },
+  ubt_core: { name: 'Flaming Torch', image: partySymbol('ubt'), note: 'Shiv Sena (UBT) symbol' },
+  ubt_legal: { name: 'Flaming Torch', image: partySymbol('ubt'), note: 'Shiv Sena (UBT) legal network' },
+  ubt_assets: { name: 'Flaming Torch', image: partySymbol('ubt'), note: 'Shiv Sena (UBT) asset network' },
+  dmk_core: {
+    name: 'Rising Sun',
+    glyph: '☀',
+    image: partySymbol('dmk'),
+    note: 'Dravida Munnetra Kazhagam symbol'
+  },
+  dmk_rajya: {
+    name: 'Rising Sun',
+    glyph: '☀',
+    image: partySymbol('dmk'),
+    note: 'DMK parliamentary profile'
+  },
+  sp_core: {
+    name: 'Bicycle',
+    glyph: '🚲',
+    image: partySymbol('sp'),
+    note: 'Samajwadi Party symbol'
+  },
+  sp_rajya: {
+    name: 'Bicycle',
+    glyph: '🚲',
+    image: partySymbol('sp'),
+    note: 'Samajwadi Party parliamentary profile'
+  },
+  rjd_core: {
+    name: 'Lantern',
+    glyph: '🏮',
+    image: partySymbol('rjd'),
+    note: 'Rashtriya Janata Dal symbol'
+  },
+  rjd_legal: {
+    name: 'Lantern',
+    glyph: '🏮',
+    image: partySymbol('rjd'),
+    note: 'RJD legal profile'
+  },
+  bjd_core: {
+    name: 'Conch',
+    glyph: '🐚',
+    image: partySymbol('bjd'),
+    note: 'Biju Janata Dal symbol'
+  },
+  bjd_funding: {
+    name: 'Conch',
+    glyph: '🐚',
+    image: partySymbol('bjd'),
+    note: 'BJD funding profile'
+  },
+  bjd_legal: {
+    name: 'Conch',
+    glyph: '🐚',
+    image: partySymbol('bjd'),
+    note: 'BJD legal profile'
+  },
+  aimim_core: {
+    name: 'Kite',
+    glyph: '🪁',
+    image: partySymbol('aimim'),
+    note: 'All India Majlis-e-Ittehadul Muslimeen symbol'
+  },
+  aimim_legal: {
+    name: 'Kite',
+    glyph: '🪁',
+    image: partySymbol('aimim'),
+    note: 'AIMIM legal profile'
+  },
+  nc_core: {
+    name: 'Plough',
+    glyph: '🟥',
+    image: partySymbol('nc'),
+    note: 'Jammu & Kashmir National Conference symbol'
+  },
+  nc_governance: {
+    name: 'Plough',
+    glyph: '🟥',
+    image: partySymbol('nc'),
+    note: 'National Conference governance profile'
+  },
+  pdp_core: {
+    name: 'Inkpot and Pen',
+    glyph: '✒',
+    image: partySymbol('pdp'),
+    note: 'Jammu & Kashmir Peoples Democratic Party symbol'
+  },
+  shiv_sena_core: {
+    name: 'Bow and Arrow',
+    glyph: '➹',
+    image: partySymbol('shiv-sena'),
+    note: 'Shiv Sena symbol'
+  },
+  sad_core: { name: 'Scales', glyph: '⚖', image: partySymbol('sad'), note: 'Shiromani Akali Dal symbol' },
+  sad_legal: { name: 'Scales', glyph: '⚖', image: partySymbol('sad'), note: 'Shiromani Akali Dal legal profile' },
+};
+
+// â”€â”€â”€ SEARCH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function normalizeRefQuery(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
 }
 
-function nodeGroup(node) {
-  const text = `${node.category} ${node.relation} ${node.details}`.toLowerCase();
-  if (text.includes("asset") || text.includes("portfolio") || text.includes("property") || text.includes("shares") || text.includes("income")) return "asset";
-  if (text.includes("company") || text.includes("trust") || text.includes("foundation") || text.includes("projects") || text.includes("journals")) return node.category.toLowerCase().includes("party-owned") ? "core" : "company";
-  if (text.includes("party-owned")) return "core";
-  if (text.includes("leader")) return "leader";
-  if (text.includes("party-affiliated individual")) return "leader";
-  return "other";
+function wikipediaSearchUrl(query) {
+  return `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(normalizeRefQuery(query))}`;
 }
 
-function nodeRadius(node) {
-  const base = { core: 44, leader: 36, company: 30, asset: 24, other: 22 }[node.group] || 24;
-  return Math.min(64, base + Math.min(16, node.degree * 2));
+function newsSearchUrl(query) {
+  return `https://news.google.com/search?q=${encodeURIComponent(normalizeRefQuery(query))}`;
 }
 
-function nodeLabel(node) {
-  const parts = node.name.split(/\s+/);
-  return parts.length === 1 ? parts[0].slice(0, 2).toUpperCase() : parts.slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+function isCaseLike(node = {}) {
+  const haystack = normalizeRefQuery(`${node.label || ''} ${node.desc || ''} ${node.type || ''}`).toLowerCase();
+  return /case|controvers|probe|bail|raid|summons|scam|fir|criminal|assets|allegation|arrest|charges|court|legal|money laundering|disproportionate|ed |acb|cbi/.test(haystack);
 }
 
-function ensureNode(name, seed = {}) {
-  const id = slugify(name);
-  let node = nodes.get(id);
-  if (!node) {
-    node = {
-      id,
-      name,
-      category: seed.category || "",
-      relation: seed.relation || "",
-      details: seed.details || "",
-      x: width * (0.22 + Math.random() * 0.56),
-      y: height * (0.2 + Math.random() * 0.52),
-      vx: 0,
-      vy: 0,
-      fx: null,
-      fy: null,
-      degree: 0,
-      incoming: [],
-      outgoing: [],
-      group: seed.group || "other",
-    };
-    nodes.set(id, node);
+function referenceForNode(node, entity) {
+  const label = normalizeRefQuery(node.label || node.name || entity?.name || '');
+  const context = normalizeRefQuery(`${label} ${entity?.name || ''} ${node.desc || ''}`);
+  if (node.type === 'person') {
+    return { href: wikipediaSearchUrl(label), label: 'Wikipedia profile', kind: 'wiki' };
   }
-  if (seed.category && !node.category) node.category = seed.category;
-  if (seed.relation && !node.relation) node.relation = seed.relation;
-  if (seed.details && !node.details) node.details = seed.details;
-  return node;
-}
-
-for (const row of rows) {
-  const source = ensureNode(row.name, { category: row.category, relation: row.relation, details: row.details });
-  const target = ensureNode(row.associated, { category: row.category, relation: row.relation, details: row.details });
-  source.group = nodeGroup(source);
-  target.group = nodeGroup(target);
-  if (source.id !== target.id) {
-    const link = {
-      id: `${source.id}-${target.id}-${links.length}`,
-      source: source.id,
-      target: target.id,
-      relation: row.relation,
-      details: row.details,
-      weight: row.details.includes("%") ? 2 : 1,
-    };
-    links.push(link);
-    source.outgoing.push(link);
-    target.incoming.push(link);
+  if (isCaseLike(node) || ['flag', 'govt', 'govtlink', 'investigating'].includes(node.type)) {
+    return { href: newsSearchUrl(context), label: 'News coverage', kind: 'news' };
   }
+  return { href: wikipediaSearchUrl(context || label), label: 'Web reference', kind: 'wiki' };
 }
 
-for (const node of nodes.values()) {
-  node.group = nodeGroup(node);
-  node.degree = node.incoming.length + node.outgoing.length;
-}
-
-const root = nodes.get(slugify("Indian National Congress"));
-if (root) {
-  root.fx = 380;
-  root.fy = 305;
-}
-const focusNode = [...nodes.values()].sort((a, b) => b.degree - a.degree)[0] || root || [...nodes.values()][0];
-state.selectedId = focusNode?.id || root?.id || "";
-
-loadingBar.style.width = "100%";
-setTimeout(() => {
-  loadingBar.style.opacity = "0";
-}, 220);
-
-function populateQuickSearches() {
-  quickSearches.innerHTML = "";
-  for (const name of quickTargets) {
-    const chip = document.createElement("div");
-    chip.className = "quick-chip";
-    chip.textContent = name;
-    chip.addEventListener("click", () => loadEntity(name));
-    quickSearches.appendChild(chip);
+function referenceForEntity(entity) {
+  const label = normalizeRefQuery(entity?.name || entity?.id || '');
+  const context = normalizeRefQuery(`${label} ${entity?.desc || ''}`);
+  if (/person/i.test(entity?.type)) {
+    return { href: wikipediaSearchUrl(label), label: 'Wikipedia profile', kind: 'wiki' };
   }
-}
-
-const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-defs.innerHTML = `
-  <filter id="nodeShadow" x="-30%" y="-30%" width="160%" height="160%">
-    <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#151515" flood-opacity="0.22"></feDropShadow>
-  </filter>
-  <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
-    <path d="M0,0 L12,6 L0,12 z" fill="rgba(200,245,66,0.35)"></path>
-  </marker>
-  <linearGradient id="coreGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#dbeafe"></stop><stop offset="100%" stop-color="#1d4ed8"></stop></linearGradient>
-  <linearGradient id="leaderGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d1fae5"></stop><stop offset="100%" stop-color="#0f766e"></stop></linearGradient>
-  <linearGradient id="companyGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fef3c7"></stop><stop offset="100%" stop-color="#a16207"></stop></linearGradient>
-  <linearGradient id="assetGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#dbeafe"></stop><stop offset="100%" stop-color="#42f5c8"></stop></linearGradient>
-  <linearGradient id="otherGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e5e7eb"></stop><stop offset="100%" stop-color="#6b7280"></stop></linearGradient>
-`;
-svg.appendChild(defs);
-
-const graphLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
-const linkLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
-const nodeLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
-graphLayer.appendChild(linkLayer);
-graphLayer.appendChild(nodeLayer);
-svg.appendChild(graphLayer);
-
-for (const link of links) {
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute("class", "link");
-  path.setAttribute("marker-end", "url(#arrow)");
-  linkLayer.appendChild(path);
-  linkEls.set(link.id, path);
-}
-
-for (const node of nodes.values()) {
-  const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  group.setAttribute("class", "node");
-  const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  circle.setAttribute("r", String(nodeRadius(node)));
-  circle.setAttribute("fill", `url(#${node.group}Gradient)`);
-  const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-  label.setAttribute("text-anchor", "middle");
-  label.setAttribute("dominant-baseline", "middle");
-  label.textContent = nodeLabel(node);
-  group.appendChild(circle);
-  group.appendChild(label);
-  nodeLayer.appendChild(group);
-  nodeEls.set(node.id, group);
-
-  group.addEventListener("pointerenter", (event) => {
-    state.hoverId = node.id;
-    tooltip.innerHTML = `<strong>${node.name}</strong><span>${node.relation}</span>`;
-    tooltip.dataset.show = "true";
-    tooltip.style.left = `${event.clientX}px`;
-    tooltip.style.top = `${event.clientY}px`;
-    render();
-  });
-  group.addEventListener("pointermove", (event) => {
-    if (state.hoverId === node.id) {
-      tooltip.style.left = `${event.clientX}px`;
-      tooltip.style.top = `${event.clientY}px`;
-    }
-    if (state.draggingId === node.id) {
-      const rect = svg.getBoundingClientRect();
-      node.fx = ((event.clientX - rect.left) / rect.width) * width;
-      node.fy = ((event.clientY - rect.top) / rect.height) * height;
-    }
-  });
-  group.addEventListener("pointerleave", () => {
-    state.hoverId = null;
-    tooltip.dataset.show = "false";
-    render();
-  });
-  group.addEventListener("pointerdown", (event) => {
-    event.preventDefault();
-    state.selectedId = node.id;
-    state.draggingId = node.id;
-    node.fx = node.x;
-    node.fy = node.y;
-    group.setPointerCapture(event.pointerId);
-    render();
-  });
-  group.addEventListener("pointerup", (event) => {
-    if (state.draggingId === node.id) {
-      state.draggingId = null;
-      node.fx = null;
-      node.fy = null;
-      group.releasePointerCapture(event.pointerId);
-    }
-  });
-}
-
-function neighborSet(selectedId) {
-  const set = new Set([selectedId]);
-  const node = nodes.get(selectedId);
-  if (!node) return set;
-  for (const link of [...node.incoming, ...node.outgoing]) {
-    set.add(link.source);
-    set.add(link.target);
+  if (isCaseLike(entity) || entity?.type === 'flag') {
+    return { href: newsSearchUrl(context), label: 'News coverage', kind: 'news' };
   }
-  return set;
-}
-
-function renderSidebar(node) {
-  const related = [...node.incoming, ...node.outgoing]
-    .map((link) => {
-      const otherId = link.source === node.id ? link.target : link.source;
-      return { link, other: nodes.get(otherId) };
-    })
-    .filter((item) => item.other)
-    .sort((a, b) => (b.other.degree || 0) - (a.other.degree || 0))
-    .slice(0, 7);
-
-  sidebarStatus.textContent = state.search ? "SEARCH" : "ACTIVE";
-  sidebarBody.innerHTML = `
-    <div class="entity-header">
-      <span class="entity-type-badge" style="background:${palette[node.group] || "var(--accent)"};">${node.category || "Entity"}</span>
-      <div class="entity-name">${node.name}</div>
-      <div class="entity-desc">${node.details || "No detail supplied."}</div>
-    </div>
-    <div class="stats-row">
-      <div class="stat-cell"><span class="stat-num">${node.degree}</span><span class="stat-label">Connections</span></div>
-      <div class="stat-cell"><span class="stat-num">${node.incoming.length}</span><span class="stat-label">Incoming</span></div>
-      <div class="stat-cell"><span class="stat-num">${node.outgoing.length}</span><span class="stat-label">Outgoing</span></div>
-    </div>
-    <div class="sidebar-section">
-      <div class="section-head"><span>Key links</span><span>${related.length}</span></div>
-      <div class="section-content" id="relation-slot"></div>
-    </div>
-    <div class="sidebar-section">
-      <div class="section-head"><span>Network context</span><span>${node.group}</span></div>
-      <div class="section-content">
-        <div class="alert-box" style="border-left-color: var(--accent2);"><p><strong>Category:</strong> ${node.category || "Unclassified"}<br><strong>Relation:</strong> ${node.relation || "None"}</p></div>
-        <div class="alert-box" style="border-left-color: var(--amber);"><p><strong>Source:</strong> ${node.details || "No source notes supplied."}</p></div>
-      </div>
-    </div>
-  `;
-
-  const slot = sidebarBody.querySelector("#relation-slot");
-  if (!related.length) {
-    slot.innerHTML = `<div class="sidebar-empty" style="padding:12px 0 0;text-align:left;"><p>NO DIRECT RELATIONSHIPS FOUND</p></div>`;
-    return;
-  }
-  slot.innerHTML = related
-    .map(({ link, other }) => {
-      const outward = link.source === node.id;
-      const dot = outward ? "var(--accent)" : "var(--blue)";
-      return `
-        <div class="node-card" data-linked="${other.id}">
-          <div class="node-dot" style="background:${dot};"></div>
-          <div class="node-card-text">
-            <div class="node-card-name">${outward ? "To" : "From"} ${other.name}</div>
-            <div class="node-card-sub">${link.relation} · ${link.details}</div>
-          </div>
-          <div class="node-card-arrow">→</div>
-        </div>
-      `;
-    })
-    .join("");
-  slot.querySelectorAll(".node-card").forEach((card) => {
-    card.addEventListener("click", () => {
-      const target = nodes.get(card.getAttribute("data-linked"));
-      if (target) loadEntity(target.name);
-    });
-  });
-}
-
-function updatePhysics() {
-  const nodesArray = [...nodes.values()];
-  for (const node of nodesArray) {
-    const center = centers[node.group] || centers.other;
-    const targetX = node.fx ?? center.x;
-    const targetY = node.fy ?? center.y;
-    node.vx += (targetX - node.x) * 0.00065;
-    node.vy += (targetY - node.y) * 0.00065;
-  }
-
-  for (let i = 0; i < nodesArray.length; i += 1) {
-    for (let j = i + 1; j < nodesArray.length; j += 1) {
-      const a = nodesArray[i];
-      const b = nodesArray[j];
-      let dx = b.x - a.x;
-      let dy = b.y - a.y;
-      let dist2 = dx * dx + dy * dy;
-      if (dist2 < 0.01) dist2 = 0.01;
-      const dist = Math.sqrt(dist2);
-      const minDist = nodeRadius(a) + nodeRadius(b) + 16;
-      const overlap = Math.max(0, minDist - dist);
-      const force = (1000 / dist2) + overlap * 0.2;
-      const fx = (dx / dist) * force * 0.01;
-      const fy = (dy / dist) * force * 0.01;
-      a.vx -= fx;
-      a.vy -= fy;
-      b.vx += fx;
-      b.vy += fy;
-    }
-  }
-
-  for (const link of links) {
-    const source = nodes.get(link.source);
-    const target = nodes.get(link.target);
-    if (!source || !target) continue;
-    const dx = target.x - source.x;
-    const dy = target.y - source.y;
-    const dist = Math.hypot(dx, dy) || 1;
-    const desired = 120 + Math.min(100, Math.log((source.degree + target.degree + 2) * 10) * 24);
-    const diff = dist - desired;
-    const factor = (diff / dist) * 0.02 * (link.weight || 1);
-    source.vx += dx * factor;
-    source.vy += dy * factor;
-    target.vx -= dx * factor;
-    target.vy -= dy * factor;
-  }
-
-  for (const node of nodesArray) {
-    node.vx *= 0.84;
-    node.vy *= 0.84;
-    node.x += node.vx * 0.08;
-    node.y += node.vy * 0.08;
-    node.x = Math.max(90, Math.min(width - 90, node.x));
-    node.y = Math.max(90, Math.min(height - 90, node.y));
-  }
-}
-
-function edgePath(source, target) {
-  const dx = target.x - source.x;
-  const dy = target.y - source.y;
-  const distance = Math.hypot(dx, dy) || 1;
-  const nx = dx / distance;
-  const ny = dy / distance;
-  const sx = source.x + nx * (nodeRadius(source) + 6);
-  const sy = source.y + ny * (nodeRadius(source) + 6);
-  const tx = target.x - nx * (nodeRadius(target) + 8);
-  const ty = target.y - ny * (nodeRadius(target) + 8);
-  const curve = Math.min(90, distance * 0.18);
-  const mx = (sx + tx) / 2 - ny * curve;
-  const my = (sy + ty) / 2 + nx * curve;
-  return `M ${sx.toFixed(2)} ${sy.toFixed(2)} Q ${mx.toFixed(2)} ${my.toFixed(2)} ${tx.toFixed(2)} ${ty.toFixed(2)}`;
-}
-
-function render() {
-  const selected = nodes.get(state.selectedId) || focusNode;
-  if (!selected) return;
-
-  graphEmpty.classList.add("hidden");
-  graphLayer.setAttribute("transform", `translate(${width / 2} ${height / 2}) scale(${state.zoom}) translate(${-width / 2 + state.tx} ${-height / 2 + state.ty})`);
-  renderSidebar(selected);
-  const active = neighborSet(selected.id);
-  const searchActive = state.search.length > 0;
-
-  for (const link of links) {
-    const source = nodes.get(link.source);
-    const target = nodes.get(link.target);
-    const path = linkEls.get(link.id);
-    if (!source || !target || !path) continue;
-    const visible = active.has(source.id) && active.has(target.id) && (matchesSearch(source) || matchesSearch(target) || !searchActive);
-    path.setAttribute("d", edgePath(source, target));
-    path.classList.toggle("strong", active.has(source.id) && active.has(target.id));
-    path.classList.toggle("dimmed", searchActive ? !visible : false);
-  }
-
-  for (const node of nodes.values()) {
-    const group = nodeEls.get(node.id);
-    if (!group) continue;
-    const visible = active.has(node.id) || matchesSearch(node) || !searchActive;
-    group.setAttribute("transform", `translate(${node.x.toFixed(2)}, ${node.y.toFixed(2)})`);
-    group.classList.toggle("selected", node.id === selected.id);
-    group.classList.toggle("focused", active.has(node.id));
-    group.classList.toggle("dimmed", searchActive ? !visible : false);
-    group.style.display = visible ? "" : "none";
-    const circle = group.querySelector("circle");
-    const label = group.querySelector("text");
-    circle.setAttribute("r", String(nodeRadius(node)));
-    circle.setAttribute("fill", `url(#${node.group}Gradient)`);
-    label.textContent = nodeLabel(node);
-    label.style.display = state.labelsVisible ? "" : "none";
-  }
-}
-
-function animate() {
-  updatePhysics();
-  render();
-  requestAnimationFrame(animate);
-}
-
-function matchesSearch(node) {
-  if (!state.search) return true;
-  const text = `${node.name} ${node.category} ${node.relation} ${node.details}`.toLowerCase();
-  return text.includes(state.search);
-}
-
-function loadEntity(name) {
-  const match = [...nodes.values()].find((node) => node.name.toLowerCase() === name.toLowerCase() || node.id === slugify(name));
-  if (!match) return;
-  state.selectedId = match.id;
-  state.search = "";
-  searchInput.value = match.name;
-  render();
+  return { href: wikipediaSearchUrl(context || label), label: 'Web reference', kind: 'wiki' };
 }
 
 function runSearch() {
-  const query = searchInput.value.trim().toLowerCase();
-  state.search = query;
-  if (!query) {
-    render();
-    return;
+  const val = document.getElementById('search-input').value.trim().toLowerCase();
+  const aliases = {
+    'congress':'congress_core','rahul gandhi':'congress_core','sonia gandhi':'congress_core','mallikarjun kharge':'congress_core',
+    'priyanka gandhi':'congress_core','young indian':'congress_core','associated journals':'congress_core','national herald':'congress_core',
+    'motilal vora':'congress_core','oscar fernandes':'congress_core','suman dubey':'congress_core','sam pitroda':'congress_core',
+    'abhishek manu singhvi':'money_trail','ashok chavan':'money_trail','milind deora':'money_trail','praful patel':'money_trail',
+    'jaya bachchan':'money_trail','p. chidambaram':'money_trail','adhir ranjan chowdhury':'money_trail','zero investments':'money_trail',
+    't. subbarami reddy':'infra_links','gayatri projects':'infra_links','komatireddy':'infra_links','revanth reddy':'infra_links',
+    'klsr infratech':'infra_links','jal jeevan mission':'infra_links','nhai':'infra_links',
+    'y.s. jagan mohan reddy':'jagan_links','sandur power':'jagan_links','ys jagan':'jagan_links','bharathi':'jagan_links',
+    'tmc':'tmc_core','trinamool':'tmc_core','mamata banerjee':'tmc_core','electoral trusts':'tmc_core',
+    'jakir hossain':'tmc_wealth','ahmed javed khan':'tmc_wealth','vivek gupta':'tmc_wealth','manoj tiwary':'tmc_wealth',
+    'bayron biswas':'tmc_wealth','pradip mazumdar':'tmc_wealth','nandita chowdhury':'tmc_wealth','asok kumar chattopadhyay':'tmc_wealth',
+    'dulal chandra das':'tmc_wealth','debashis kumar':'tmc_legal','suvendu adhikari':'tmc_legal','prakash chik baraik':'tmc_legal',
+    'kunal ghosh':'tmc_legal','criminal cases':'tmc_legal',
+    'aap':'aap_core','arvind kejriwal':'aap_core','prudent electoral trust':'aap_core',
+    'aam aadmi party':'aap_core','talapadi umashankar shenoy':'aap_funding','michael d\'souza':'aap_funding',
+    'bharatha swamukti samsthe':'aap_funding','kuber polyplast':'aap_funding','advance chemicals':'aap_funding',
+    'rajinder gupta':'aap_rajya','sant balbir singh':'aap_rajya','574.09 crore':'aap_rajya',
+    'aap criminal cases':'aap_rajya','aap mp criminal cases':'aap_rajya',
+    'ubt':'ubt_core','shiv sena ubt':'ubt_core','shiv sena (ubt)':'ubt_core','uddhav thackeray':'ubt_core',
+    'sanjay raut':'ubt_core','kishori pednekar':'ubt_assets','rajan salvi':'ubt_legal','ravindra waikar':'ubt_legal',
+    'aaditya thackeray':'ubt_core','suraj chavan':'ubt_legal','tejasvini ghosalkar':'ubt_assets','bombay hc':'ubt_legal',
+    'acb case':'ubt_legal','flaming torch':'ubt_core','shiv sena':'shiv_sena_core','bow and arrow':'shiv_sena_core',
+    'dmk':'dmk_core','dravida munnetra kazhagam':'dmk_core','m. k. stalin':'dmk_core','mk stalin':'dmk_core',
+    'durga stalin':'dmk_core','progressive electoral trust':'dmk_core','future gaming':'dmk_core','megha engineering':'dmk_core',
+    'dayanidhi maran':'dmk_core','ma subramanian':'dmk_core','sun group':'dmk_core','dmk rajya sabha':'dmk_rajya',
+    'dmk rs':'dmk_rajya','dmk mp criminal cases':'dmk_rajya','dmk average assets':'dmk_rajya',
+    'samajwadi party':'sp_core','sp':'sp_core','akhilesh yadav':'sp_core','mulayam singh yadav':'sp_core',
+    'i-pac':'sp_core','vision india':'sp_core','jaya bachchan':'sp_rajya','sp rajya sabha':'sp_rajya',
+    'sp mp criminal cases':'sp_rajya','sp average assets':'sp_rajya','2027 up elections':'sp_core',
+    'rjd':'rjd_core','rashtriya janata dal':'rjd_core','lalu prasad yadav':'rjd_core','tejashwi prasad yadav':'rjd_core',
+    'rabri devi':'rjd_core','misa bharti':'rjd_core','land-for-job scam':'rjd_core','land for job scam':'rjd_core',
+    'sudhakar singh':'rjd_legal','rjd rajya sabha':'rjd_legal','rjd mp criminal cases':'rjd_legal','rjd legal':'rjd_legal',
+    'bjd':'bjd_core','biju janata dal':'bjd_core','naveen patnaik':'bjd_core','principal opposition in odisha':'bjd_core',
+    'biju patnaik legacy':'bjd_core','scb protest':'bjd_core','santrupt misra':'bjd_legal','v. k. pandian':'bjd_legal',
+    'prabhat biswal':'bjd_legal','biju-naveen foundation':'bjd_legal','bjd funding':'bjd_funding','vedanta':'bjd_funding',
+    'bjd trusts':'bjd_funding','bjd rajya sabha':'bjd_core','bjd average assets':'bjd_core','bjd mlas':'bjd_legal',
+    'cpi':'cpi_core','communist party of india':'cpi_core','d. raja':'cpi_core','k. subbarayan':'cpi_core',
+    'p. santhosh kumar':'cpi_core','cpi kerala':'cpi_core','cpi tamil nadu':'cpi_core',
+    'aimim':'aimim_core','all india majlis-e-ittehadul muslimeen':'aimim_core','asaduddin owaisi':'aimim_core',
+    'humayun kabir':'aimim_core','aaup':'aimim_core','shaukat ali':'aimim_legal','bjp funding':'aimim_legal',
+    'minority vote split':'aimim_legal','west bengal assembly 2026':'aimim_core',
+    'national conference':'nc_core','jammu & kashmir national conference':'nc_core','jammu and kashmir national conference':'nc_core',
+    'farooq abdullah':'nc_core','omar abdullah':'nc_core','ajay kumar sadhotra':'nc_core','cdf allocation':'nc_governance',
+    'tanvir sadiq':'nc_core','ghulam ali khatana':'nc_core','j&k cdf':'nc_governance','mplads critique':'nc_governance',
+    'pdp':'pdp_core','jammu & kashmir peoples democratic party':'pdp_core','mehbooba mufti':'pdp_core',
+    'darshan kumar magotra':'pdp_core','aditya gupta':'pdp_core','assembly resolution':'pdp_core',
+    'shiromani akali dal':'sad_core','sad':'sad_core','sukhbir singh badal':'sad_core','bikram singh majithia':'sad_legal',
+    'disproportionate assets':'sad_legal','drug money':'sad_legal','punjab assembly 2027':'sad_core',
+  };
+  const aliasMatch = Object.keys(aliases).find(a => val.includes(a));
+  if (aliasMatch) { loadEntity(aliases[aliasMatch]); return; }
+  const match = Object.keys(CONGRESS_MAP).find(k => CONGRESS_MAP[k].name.toLowerCase().includes(val) || k.includes(val));
+  if (match) loadEntity(match);
+  else alert('Entity not in dataset. Try Congress Core, TMC Core, AAP Core, UBT Core, DMK Core, SP Core, RJD Core, BJD Core, AIMIM Core, NC Core, PDP Core, or SAD Core.');
+}
+document.getElementById('search-input').addEventListener('keydown', e => { if(e.key==='Enter') runSearch(); });
+
+function loadEntity(key) {
+  const entity = CONGRESS_MAP[key];
+  if (!entity) return;
+  const toggle = document.getElementById('quick-options-toggle');
+  if (toggle && window.matchMedia('(max-width: 640px)').matches) {
+    toggle.checked = false;
   }
-  const match = [...nodes.values()].find((node) => `${node.name} ${node.category} ${node.relation} ${node.details}`.toLowerCase().includes(query));
-  if (match) state.selectedId = match.id;
-  render();
+  document.getElementById('search-input').value = entity.name;
+  currentEntity = entity;
+  animateLoading(() => {
+    renderGraph(entity);
+    renderSidebarEntity(entity);
+    document.getElementById('graph-empty').style.display = 'none';
+    document.getElementById('graph-legend').classList.add('visible');
+    document.getElementById('sidebar-status').textContent = 'LOADED';
+  });
 }
 
-function zoomIn() {
-  state.zoom = Math.min(1.8, state.zoom * 1.15);
-  render();
+function animateLoading(cb) {
+  const bar = document.getElementById('loading');
+  bar.style.width = '40%';
+  setTimeout(() => { bar.style.width = '80%'; }, 200);
+  setTimeout(() => { bar.style.width = '100%'; cb(); }, 600);
+  setTimeout(() => { bar.style.width = '0%'; bar.style.transition = 'none'; setTimeout(()=>{bar.style.transition='width 0.4s';},50); }, 900);
 }
 
-function zoomOut() {
-  state.zoom = Math.max(0.55, state.zoom / 1.15);
-  render();
+// â”€â”€â”€ GRAPH RENDERING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function renderGraph(entity) {
+  const container = document.getElementById('graph-container');
+  const W = container.clientWidth, H = container.clientHeight;
+  const isPhone = W < 640;
+  const isTablet = W < 980 && !isPhone;
+
+  d3.select('#graph-container svg').remove();
+  const svg = d3.select('#graph-container').append('svg')
+    .attr('width', W).attr('height', H);
+  svgEl = svg;
+
+  const defs = svg.append('defs');
+  const gradientMap = {
+    root: ['#ece2ce', '#4b5d16'],
+    person: ['#f6f4f1', '#223300'],
+    sub: ['#f6f4f1', '#f2b635'],
+    govt: ['#f2b635', '#e45c10'],
+    global: ['#ece2ce', '#b78a2a'],
+    flag: ['#f6f4f1', '#e45c10'],
+    family: ['#ece2ce', '#4b5d16'],
+  };
+  Object.entries(gradientMap).forEach(([key, [start, end]]) => {
+    const grad = defs.append('linearGradient').attr('id', `grad-${key}`).attr('x1', '0%').attr('x2', '100%').attr('y1', '0%').attr('y2', '100%');
+    grad.append('stop').attr('offset', '0%').attr('stop-color', start);
+    grad.append('stop').attr('offset', '100%').attr('stop-color', end);
+  });
+
+  // Zoom
+  const g = svg.append('g');
+  zoomBeh = d3.zoom().scaleExtent([0.3, 3]).on('zoom', e => g.attr('transform', e.transform));
+  svg.call(zoomBeh);
+
+  // Prep data
+  const nodes = entity.nodes.filter(n => n.type === 'root' || activeFilters.has(n.type)).map(n => ({...n}));
+  const nodeIds = new Set(nodes.map(n => n.id));
+  const links = entity.links
+    .filter(l => nodeIds.has(l.source) && nodeIds.has(l.target))
+    .map(l => ({...l}));
+
+  // Simulation
+  const chargeStrength = isPhone ? -440 : isTablet ? -340 : -300;
+  const collisionPad = isPhone ? 14 : 10;
+  simulation = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).id(d => d.id).distance(d => d.strong ? 96 : (isPhone ? 138 : 120)).strength(0.6))
+    .force('charge', d3.forceManyBody().strength(chargeStrength))
+    .force('center', d3.forceCenter(W/2, H/2))
+    .force('collision', d3.forceCollide().radius(d => d.size + collisionPad));
+
+  // Draw links
+  const link = g.append('g').selectAll('line')
+    .data(links).join('line')
+    .attr('class', d => 'link' + (d.strong ? ' strong' : ''))
+    .attr('stroke', d => LINK_COLOR[d.type] || '#666')
+    .attr('stroke-dasharray', d => d.type === 'controversy' ? '4 3' : null);
+
+  // Draw nodes
+  const node = g.append('g').selectAll('g')
+    .data(nodes).join('g')
+    .attr('class', 'node')
+    .call(d3.drag()
+      .on('start', (e,d) => { if(!e.active) simulation.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+      .on('drag',  (e,d) => { d.fx=e.x; d.fy=e.y; })
+      .on('end',   (e,d) => { if(!e.active) simulation.alphaTarget(0); d.fx=null; d.fy=null; })
+    )
+    .on('click', (e,d) => { e.stopPropagation(); highlightNode(d, node, link); renderSidebarNode(d); })
+    .on('mouseover', (e,d) => showTooltip(e, d))
+    .on('mousemove', e => moveTooltip(e))
+    .on('mouseout', hideTooltip);
+
+  node.append('circle')
+    .attr('r', d => d.size)
+    .attr('fill', d => `url(#grad-${d.type})`)
+    .attr('stroke', '#f6f4f1');
+
+  // Inner dot
+  node.append('circle')
+    .attr('r', d => d.size * 0.3)
+    .attr('fill', '#f6f4f1')
+    .attr('opacity', 1);
+
+  // Labels
+  const labels = node.append('text')
+    .attr('class', 'node-label')
+    .attr('dy', d => d.size + 13)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', d => isPhone ? (d.type === 'root' ? 10 : 8) : d.type === 'root' ? 12 : 10)
+    .attr('font-weight', d => d.type === 'root' ? 600 : 400)
+    .attr('fill', d => TYPE_COLOR[d.type])
+    .attr('opacity', showLabels ? 1 : 0)
+    .text(d => d.label);
+
+  // Click on svg to deselect
+  svg.on('click', () => {
+    node.classed('highlighted', false).classed('dimmed', false);
+    link.classed('dimmed', false);
+    renderSidebarEntity(entity);
+  });
+
+  simulation.on('tick', () => {
+    link
+      .attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+      .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+    node.attr('transform', d => `translate(${d.x},${d.y})`);
+  });
 }
 
-function resetZoom() {
-  state.zoom = 0.95;
-  state.tx = 0;
-  state.ty = 0;
-  render();
+function highlightNode(d, nodesSel, linksSel) {
+  nodesSel.classed('highlighted', n => n.id === d.id)
+          .classed('dimmed', n => n.id !== d.id);
+  linksSel.classed('dimmed', l => l.source.id !== d.id && l.target.id !== d.id);
+  // un-dim connected
+  const connected = new Set();
+  linksSel.each(l => {
+    if(l.source.id === d.id) connected.add(l.target.id);
+    if(l.target.id === d.id) connected.add(l.source.id);
+  });
+  nodesSel.filter(n => connected.has(n.id)).classed('dimmed', false);
+  linksSel.filter(l => l.source.id === d.id || l.target.id === d.id).classed('dimmed', false);
 }
 
+// â”€â”€â”€ TOOLTIP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const tip = document.getElementById('tooltip');
+function showTooltip(e, d) {
+  tip.innerHTML = `<strong style="color:${TYPE_COLOR[d.type]}">${d.label}</strong><br>${d.desc.substring(0,80)}...`;
+  tip.style.opacity = 1;
+  moveTooltip(e);
+}
+function moveTooltip(e) {
+  tip.style.left = (e.clientX + 14) + 'px';
+  tip.style.top = (e.clientY - 10) + 'px';
+}
+function hideTooltip() { tip.style.opacity = 0; }
+
+// â”€â”€â”€ SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function renderSidebarEntity(entity) {
+  document.getElementById('sidebar-status').textContent = 'MAPPED';
+  const risk = entity.riskLevel;
+  const riskColor = risk === 'HIGH' ? '#e45c10' : risk === 'MEDIUM' ? '#f2b635' : '#4b5d16';
+  const entityRef = referenceForEntity(entity);
+  const symbol = PARTY_SYMBOLS[entity.id] || PARTY_SYMBOLS[entity.name.toLowerCase()] || { name: 'Symbol', glyph: '•', note: 'No symbol mapped' };
+  const symbolMarkup = symbol.image
+    ? `<div class="symbol-glyph symbol-glyph-image"><img src="${symbol.image}" alt="${symbol.name}"></div>`
+    : `<div class="symbol-glyph">${symbol.glyph}</div>`;
+
+  const subsections = buildSubSections(entity);
+
+  document.getElementById('sidebar-body').innerHTML = `
+    <div class="entity-header">
+      <div class="entity-type-badge" style="background:${TYPE_COLOR[entity.type]};color:${['sub','global'].includes(entity.type) ? '#223300' : '#f6f4f1'};border:1px solid ${TYPE_COLOR[entity.type]}">${entity.type.toUpperCase()}</div>
+      <div class="entity-name">${entity.name}</div>
+      <div class="entity-desc">${entity.desc}</div>
+      <div class="entity-meta-links">
+        <a class="entity-source-link" href="${entityRef.href}" target="_blank" rel="noopener noreferrer">${entityRef.label}</a>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">FOUNDED ${entity.founded}</span>
+        <span style="color:var(--border2)">·</span>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">${entity.hq}</span>
+        <span style="color:var(--border2)">·</span>
+        <span class="risk-badge" style="background:${riskColor};border-color:${riskColor}">RISK: ${risk}</span>
+      </div>
+    </div>
+
+    <div class="summary-row">
+      <div class="stats-row">
+        <div class="stat-cell"><span class="stat-num">${entity.subsidiaries}</span><span class="stat-label">Subsidiaries</span></div>
+        <div class="stat-cell"><span class="stat-num">${entity.govtLinks}</span><span class="stat-label">Govt Links</span></div>
+        <div class="stat-cell"><span class="stat-num">${entity.globalExposure}</span><span class="stat-label">Global Nodes</span></div>
+      </div>
+      <div class="symbol-card">
+        <div class="symbol-label">Party Symbol</div>
+        <div class="symbol-display">
+          ${symbolMarkup}
+          <div class="symbol-text">
+            <div class="symbol-name">${symbol.name}</div>
+            <div class="symbol-note">${symbol.note}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-row">
+      ${['sub','govt','global','person','flag'].map(t => `
+        <div class="filter-pill ${activeFilters.has(t)?'active':''}" 
+             style="background:${activeFilters.has(t)?`linear-gradient(135deg, ${TYPE_COLOR[t]}55, #f6f4f1)`: 'transparent'};color:${activeFilters.has(t)?'#223300':TYPE_COLOR[t]};border-color:${TYPE_COLOR[t]}"
+             onclick="toggleFilter('${t}')">
+          ${t === 'sub' ? 'SUBS' : t === 'govt' ? 'GOVT' : t === 'global' ? 'GLOBAL' : t === 'person' ? 'PEOPLE' : 'FLAGS'}
+        </div>
+      `).join('')}
+    </div>
+
+    ${subsections}
+
+    ${entity.alerts.length ? `
+    <div class="sidebar-section">
+      <div class="section-head">! INTELLIGENCE FLAGS</div>
+      <div class="section-content">
+        ${entity.alerts.map(a => {
+          const c = a.level === 'high' ? '#e45c10' : a.level === 'medium' ? '#f2b635' : '#4b5d16';
+          return `<div class="alert-box" style="border-left-color:${c};background:${c}10">
+            <strong>${a.title}</strong>
+            <p>${a.text}</p>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    ` : ''}
+
+    <div style="padding:16px;font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.8;letter-spacing:0.06em">
+      DATA: PUBLIC FILINGS / BSE / NSE / CORPORATE REGISTRY<br>
+      State Mirror by Downties<br>
+      <span style="color:var(--accent)">CLICK ANY NODE TO DRILL DOWN -></span>
+    </div>
+  `;
+}
+
+function buildSubSections(entity) {
+  const byType = {};
+  entity.nodes.forEach(n => {
+    if(n.type === 'root') return;
+    if(!byType[n.type]) byType[n.type] = [];
+    byType[n.type].push(n);
+  });
+
+  const typeLabel = { sub:'SUBSIDIARIES', govt:'GOVT LINKS', global:'GLOBAL EXPOSURE', person:'KEY PERSONS', flag:'CONTROVERSIES' };
+  let html = '';
+  for(const [type, nodes] of Object.entries(byType)) {
+    html += `
+      <div class="sidebar-section">
+        <div class="section-head">${typeLabel[type] || type.toUpperCase()} <span style="color:var(--accent)">${nodes.length}</span></div>
+        <div class="section-content">
+          ${nodes.map(n => {
+            const ref = referenceForNode(n, entity);
+            return `
+              <a class="node-card external-link" href="${ref.href}" target="_blank" rel="noopener noreferrer" title="${ref.label}">
+                <div class="node-dot" style="background:${TYPE_COLOR[n.type]}"></div>
+                <div class="node-card-text">
+                  <div class="node-card-name">${n.label}</div>
+                  <div class="node-card-sub">${n.desc.substring(0,55)}...</div>
+                </div>
+                <div class="node-card-arrow">↗</div>
+              </a>
+            `;
+          }).join('')}
+        </div>
+      </div>`;
+  }
+  return html;
+}
+
+function renderSidebarNode(d) {
+  document.getElementById('sidebar-status').textContent = 'NODE';
+  const color = TYPE_COLOR[d.type];
+  const nodeRef = referenceForNode(d, currentEntity);
+  const linkedNodes = [];
+  if(currentEntity) {
+    currentEntity.links.forEach(l => {
+      const other = l.source === d.id ? l.target : l.target === d.id ? l.source : null;
+      if(other) {
+        const n = currentEntity.nodes.find(n => n.id === other);
+        if(n) linkedNodes.push({ node:n, rel:l.type });
+      }
+    });
+  }
+
+  document.getElementById('sidebar-body').innerHTML = `
+    <div class="entity-header">
+      <div class="entity-type-badge" style="background:${color};color:${['sub','global'].includes(d.type) ? '#223300' : '#f6f4f1'};border:1px solid ${color}">${d.type.toUpperCase()}</div>
+      <div class="entity-name">${d.label}</div>
+      <div class="entity-desc">${d.desc}</div>
+      <div class="entity-meta-links">
+        <a class="entity-source-link" href="${nodeRef.href}" target="_blank" rel="noopener noreferrer">${nodeRef.label}</a>
+      </div>
+    </div>
+
+    ${linkedNodes.length ? `
+    <div class="sidebar-section">
+      <div class="section-head">CONNECTIONS <span style="color:var(--accent)">${linkedNodes.length}</span></div>
+      <div class="section-content">
+        ${linkedNodes.map(({node, rel}) => {
+          const ref = referenceForNode(node, currentEntity);
+          return `
+            <a class="node-card external-link" href="${ref.href}" target="_blank" rel="noopener noreferrer" title="${ref.label}">
+              <div class="node-dot" style="background:${TYPE_COLOR[node.type]}"></div>
+              <div class="node-card-text">
+                <div class="node-card-name">${node.label}</div>
+                <div class="node-card-sub" style="color:${LINK_COLOR[rel]||'var(--muted)'}">${rel.toUpperCase()}</div>
+              </div>
+              <div class="node-card-arrow">↗</div>
+            </a>
+          `;
+        }).join('')}
+      </div>
+    </div>` : ''}
+
+    <div style="padding:16px">
+      <button style="width:100%;background:transparent;border:1px solid var(--border2);color:var(--muted);font-family:var(--mono);font-size:10px;padding:8px;border-radius:16px;cursor:pointer;letter-spacing:0.1em" 
+              onclick="renderSidebarEntity(currentEntity)">&larr; BACK TO OVERVIEW</button>
+    </div>
+  `;
+}
+
+function selectNodeById(id) {
+  if(!svgEl || !currentEntity) return;
+  const nodeData = currentEntity.nodes.find(n => n.id === id);
+  if(!nodeData) return;
+  renderSidebarNode(nodeData);
+  // highlight
+  const allNodes = svgEl.selectAll('.node');
+  const allLinks = svgEl.selectAll('.link');
+  highlightNode({id}, allNodes, allLinks);
+}
+
+// â”€â”€â”€ FILTERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function toggleFilter(type) {
+  if(activeFilters.has(type)) activeFilters.delete(type);
+  else activeFilters.add(type);
+  if(currentEntity) renderGraph(currentEntity);
+}
+
+// â”€â”€â”€ ZOOM CONTROLS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function zoomIn()    { if(svgEl && zoomBeh) svgEl.transition().call(zoomBeh.scaleBy, 1.4); }
+function zoomOut()   { if(svgEl && zoomBeh) svgEl.transition().call(zoomBeh.scaleBy, 0.7); }
+function resetZoom() { if(svgEl && zoomBeh) svgEl.transition().call(zoomBeh.transform, d3.zoomIdentity); }
 function toggleLabels() {
-  state.labelsVisible = !state.labelsVisible;
-  render();
+  showLabels = !showLabels;
+  if(svgEl) svgEl.selectAll('.node-label').attr('opacity', showLabels ? 1 : 0);
 }
 
-populateQuickSearches();
-searchInput.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") runSearch();
-});
-searchInput.addEventListener("input", () => {
-  state.search = searchInput.value.trim().toLowerCase();
-});
-
-window.runSearch = runSearch;
-window.loadEntity = loadEntity;
-window.zoomIn = zoomIn;
-window.zoomOut = zoomOut;
-window.resetZoom = resetZoom;
-window.toggleLabels = toggleLabels;
-
-render();
-animate();
+// â”€â”€â”€ INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+window.addEventListener('resize', () => { if(currentEntity) renderGraph(currentEntity); });
