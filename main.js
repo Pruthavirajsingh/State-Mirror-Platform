@@ -1256,6 +1256,45 @@ let activeFilters = new Set(['sub','govt','global','person','flag']);
 const PARTY_SYMBOL_DIR = 'party-symbols';
 const partySymbol = (file) => `${PARTY_SYMBOL_DIR}/${file}.svg`;
 
+const normalizeSymbolKey = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+
+const PARTY_SYMBOL_ALIASES = {
+  congress: 'congress_core',
+  indiannationalcongress: 'congress_core',
+  congresscore: 'congress_core',
+  youngindian: 'congress_core',
+  associatedjournals: 'congress_core',
+  nationalherald: 'congress_core',
+  tmc: 'tmc_core',
+  trinamoolcongress: 'tmc_core',
+  allindiatrinamoolcongress: 'tmc_core',
+  aap: 'aap_core',
+  aamaadmiaparty: 'aap_core',
+  cpi: 'cpi_core',
+  communistpartyofindia: 'cpi_core',
+  ubt: 'ubt_core',
+  shivsenaubt: 'ubt_core',
+  uddhavbalasahebthackeray: 'ubt_core',
+  shivsena: 'shiv_sena_core',
+  shivsenabowandarrow: 'shiv_sena_core',
+  dmk: 'dmk_core',
+  dravidamunnetrakazhagam: 'dmk_core',
+  sp: 'sp_core',
+  samajwadiparty: 'sp_core',
+  rjd: 'rjd_core',
+  rashtriyajanatadal: 'rjd_core',
+  bjd: 'bjd_core',
+  bijujanatadal: 'bjd_core',
+  aimim: 'aimim_core',
+  allindiamajliseittehadulmuslimeen: 'aimim_core',
+  nc: 'nc_core',
+  jammuandkashmirnationalconference: 'nc_core',
+  pdp: 'pdp_core',
+  jammuandkashmirpeoplesdemocraticparty: 'pdp_core',
+  sad: 'sad_core',
+  shiromaniakalidal: 'sad_core',
+};
+
 const PARTY_SYMBOLS = {
   congress_core: {
     name: 'Raised Hand',
@@ -1457,6 +1496,40 @@ const referenceForEntity = trackerRefs.referenceForEntity || function(entity) {
   }
   return { href: wikipediaSearchUrl(context || label), label: 'Web reference', kind: 'wiki' };
 };
+
+function resolvePartySymbol(entity = {}) {
+  const candidates = [
+    entity.id,
+    entity.name,
+    entity.label,
+    entity.type,
+    `${entity.id || ''} ${entity.name || ''}`,
+  ];
+
+  for (const candidate of candidates) {
+    const normalized = normalizeSymbolKey(candidate);
+    if (!normalized) continue;
+    if (PARTY_SYMBOLS[normalized]) {
+      return PARTY_SYMBOLS[normalized];
+    }
+    const aliasTarget = PARTY_SYMBOL_ALIASES[normalized];
+    if (aliasTarget && PARTY_SYMBOLS[aliasTarget]) {
+      return PARTY_SYMBOLS[aliasTarget];
+    }
+  }
+
+  const haystack = normalizeSymbolKey(`${entity.id || ''} ${entity.name || ''} ${entity.type || ''}`);
+  for (const [alias, target] of Object.entries(PARTY_SYMBOL_ALIASES)) {
+    if (haystack.includes(alias) && PARTY_SYMBOLS[target]) {
+      return PARTY_SYMBOLS[target];
+    }
+  }
+
+  return { name: 'Symbol', glyph: '•', note: 'No symbol mapped' };
+}
+
+window.PARTY_SYMBOLS = PARTY_SYMBOLS;
+window.resolvePartySymbol = resolvePartySymbol;
 
 function applyTrackerDataOverlay(data) {
   if (!data || typeof data !== 'object') return;
@@ -1714,10 +1787,11 @@ function renderSidebarEntity(entity) {
   const risk = entity.riskLevel;
   const riskColor = risk === 'HIGH' ? '#e45c10' : risk === 'MEDIUM' ? '#f2b635' : '#4b5d16';
   const entityRef = referenceForEntity(entity);
-  const symbol = PARTY_SYMBOLS[entity.id] || PARTY_SYMBOLS[entity.name.toLowerCase()] || { name: 'Symbol', glyph: '•', note: 'No symbol mapped' };
+  const symbol = resolvePartySymbol(entity);
+  const fallbackSymbolLabel = normalizeSymbolKey(symbol.name || 'Symbol').slice(0, 2).toUpperCase() || 'SY';
   const symbolMarkup = symbol.image
     ? `<div class="symbol-glyph symbol-glyph-image"><img src="${symbol.image}" alt="${symbol.name}"></div>`
-    : `<div class="symbol-glyph">${symbol.glyph}</div>`;
+    : `<div class="symbol-glyph symbol-glyph-text">${fallbackSymbolLabel}</div>`;
 
   const subsections = buildSubSections(entity);
 
