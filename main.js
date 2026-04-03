@@ -1256,7 +1256,38 @@ let activeFilters = new Set(['sub','govt','global','person','flag']);
 const PARTY_SYMBOL_DIR = 'party-symbols';
 const partySymbol = (file) => `${PARTY_SYMBOL_DIR}/${file}.svg`;
 
-const normalizeSymbolKey = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+const PARTY_SYMBOL_REMOTE_IMAGES = {
+  congress: 'https://commons.wikimedia.org/wiki/Special:FilePath/INC%20Hand.svg',
+  tmc: 'https://commons.wikimedia.org/wiki/Special:FilePath/All%20India%20Trinamool%20Congress%20symbol.svg',
+  aap: 'https://commons.wikimedia.org/wiki/Special:FilePath/AAP%20Symbol.png',
+  cpi: 'https://commons.wikimedia.org/wiki/Special:FilePath/CPI%20symbol.svg',
+  ubt: 'https://commons.wikimedia.org/wiki/Special:FilePath/Indian%20Election%20Symbol%20Flaming%20Torch.png',
+  rjd: 'https://commons.wikimedia.org/wiki/Special:FilePath/RJD%20Flag.svg',
+  bjd: 'https://commons.wikimedia.org/wiki/Special:FilePath/Indian%20Election%20Symbol%20Conch.svg',
+  aimim: 'https://commons.wikimedia.org/wiki/Special:FilePath/Indian%20Election%20Symbol%20Kite.svg',
+  nc: 'https://commons.wikimedia.org/wiki/Special:FilePath/Indian%20Election%20Symbol%20Plough.png',
+  pdp: 'https://commons.wikimedia.org/wiki/Special:FilePath/Indian%20Election%20Symbol%20Ink%20Pot%20and%20Pen.png',
+  shivsena: 'https://commons.wikimedia.org/wiki/Special:FilePath/Indian%20Election%20Symbol%20Bow%20And%20Arrow.svg',
+};
+
+function normalizePartySymbolImage(image, key) {
+  const source = String(image || '');
+  const fileName = source.split('/').pop() || '';
+  const baseName = normalizeSymbolKey(fileName.replace(/\.(svg|png)$/i, ''));
+  const aliasKey = normalizeSymbolKey(key);
+  return PARTY_SYMBOL_REMOTE_IMAGES[baseName] || PARTY_SYMBOL_REMOTE_IMAGES[aliasKey] || source;
+}
+
+function normalizePartySymbolRecord(symbol, key) {
+  return symbol ? {
+  ...symbol,
+  image: normalizePartySymbolImage(symbol.image, key),
+  } : symbol;
+}
+
+function normalizeSymbolKey(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
 
 const PARTY_SYMBOL_ALIASES = {
   congress: 'congress_core',
@@ -1459,6 +1490,11 @@ const PARTY_SYMBOLS = {
   sad_legal: { name: 'Scales', glyph: '⚖', image: partySymbol('sad'), note: 'Shiromani Akali Dal legal profile' },
 };
 
+Object.keys(PARTY_SYMBOLS).forEach((key) => {
+  PARTY_SYMBOLS[key] = normalizePartySymbolRecord(PARTY_SYMBOLS[key], key);
+});
+
+
 // â”€â”€â”€ SEARCH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const trackerRefs = window.TrackerRefs || {};
 const normalizeRefQuery = trackerRefs.normalizeRefQuery || function(value) {
@@ -1545,7 +1581,9 @@ function applyTrackerDataOverlay(data) {
     Object.assign(LINK_COLOR, data.linkColor);
   }
   if (data.partySymbols && typeof data.partySymbols === 'object') {
-    Object.assign(PARTY_SYMBOLS, data.partySymbols);
+    Object.entries(data.partySymbols).forEach(([key, symbol]) => {
+      PARTY_SYMBOLS[key] = normalizePartySymbolRecord(symbol, key);
+    });
   }
   if (data.searchAliases && typeof data.searchAliases === 'object') {
     window.TRACKER_ALIASES = data.searchAliases;
