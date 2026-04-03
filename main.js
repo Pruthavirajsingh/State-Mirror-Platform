@@ -1354,19 +1354,19 @@ const PARTY_SYMBOLS = {
   tmc_core: {
     name: 'Jora Ghas Phul',
     glyph: '🌱',
-    image: `${partySymbol('tmc')}?v=2`,
+    image: partySymbol('tmc'),
     note: 'Trinamool Congress symbol'
   },
   tmc_wealth: {
     name: 'Jora Ghas Phul',
     glyph: '🌱',
-    image: `${partySymbol('tmc')}?v=2`,
+    image: partySymbol('tmc'),
     note: 'TMC-linked wealth network'
   },
   tmc_legal: {
     name: 'Jora Ghas Phul',
     glyph: '🌱',
-    image: `${partySymbol('tmc')}?v=2`,
+    image: partySymbol('tmc'),
     note: 'TMC faction symbol'
   },
   aap_core: {
@@ -1542,6 +1542,18 @@ function resolvePartySymbol(entity = {}) {
     `${entity.id || ''} ${entity.name || ''}`,
   ];
 
+  const exactTmcMatch = candidates.some((candidate) => {
+    const normalized = normalizeSymbolKey(candidate);
+    return normalized === 'tmc' ||
+      normalized === 'trinamool' ||
+      normalized === 'trinamoolcongress' ||
+      normalized === 'allindiatrinamoolcongress' ||
+      normalized.includes('trinamoolcongress');
+  });
+  if (exactTmcMatch && PARTY_SYMBOLS.tmc_core) {
+    return PARTY_SYMBOLS.tmc_core;
+  }
+
   for (const candidate of candidates) {
     const normalized = normalizeSymbolKey(candidate);
     if (!normalized) continue;
@@ -1555,7 +1567,8 @@ function resolvePartySymbol(entity = {}) {
   }
 
   const haystack = normalizeSymbolKey(`${entity.id || ''} ${entity.name || ''} ${entity.type || ''}`);
-  for (const [alias, target] of Object.entries(PARTY_SYMBOL_ALIASES)) {
+  const aliasEntries = Object.entries(PARTY_SYMBOL_ALIASES).sort((a, b) => b[0].length - a[0].length);
+  for (const [alias, target] of aliasEntries) {
     if (haystack.includes(alias) && PARTY_SYMBOLS[target]) {
       return PARTY_SYMBOLS[target];
     }
